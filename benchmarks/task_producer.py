@@ -10,6 +10,9 @@ from benchmarks import tasks
 
 
 async def produce_disk_io_task() -> None:
+    """
+    queue 200K of disk IO bound tasks.
+    """
     for i in range(0, 200_001):
         filename = (
             "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
@@ -21,11 +24,17 @@ async def produce_disk_io_task() -> None:
 
 
 async def produce_network_io_task() -> None:
+    """
+    queue 200K of network IO bound tasks.
+    """
     for i in range(0, 200_001):
         await tasks.network_io_task.delay()
 
 
 async def produce_cpu_bound_task() -> None:
+    """
+    queue 200K of cpu bound tasks.
+    """
     for i in range(0, 200_001):
         await tasks.cpu_bound_task.delay()
 
