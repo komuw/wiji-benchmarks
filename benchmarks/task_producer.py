@@ -39,13 +39,25 @@ async def produce_cpu_bound_task() -> None:
         await tasks.cpu_bound_task.delay()
 
 
+async def produce_adder_task() -> None:
+    """
+    queue 200K of adder tasks.
+    Those will in turn generate 200K divider tasks
+    """
+    for i in range(0, 200_001):
+        await tasks.adder_task.delay(a=90, b=88)
+
+
 async def main() -> None:
     """
     main function to produce tasks.
     """
 
     gather_tasks = asyncio.gather(
-        produce_disk_io_task(), produce_network_io_task(), produce_cpu_bound_task()
+        produce_disk_io_task(),
+        produce_network_io_task(),
+        produce_cpu_bound_task(),
+        produce_adder_task(),
     )
     await gather_tasks
 

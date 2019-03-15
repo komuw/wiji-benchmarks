@@ -99,3 +99,30 @@ class CPUTask(wiji.task.Task):
 
 
 cpu_bound_task = CPUTask(the_broker=BROKER, queue_name="CPUTaskQueue")
+
+
+class DividerTask(wiji.task.Task):
+    """
+    task that divides its input by 3.
+    This will be chained with the AdderTask.
+    """
+
+    async def run(self, dividend):
+        answer = dividend / 3
+        return answer
+
+
+divider_task = DividerTask(the_broker=BROKER, queue_name="DividerTaskQueue")
+
+
+class AdderTask(wiji.task.Task):
+    """
+    task that adds two numbers together
+    """
+
+    async def run(self, a, b):
+        result = a + b
+        return result
+
+
+adder_task = AdderTask(the_broker=BROKER, chain=divider_task, queue_name="AdderTaskQueue")
