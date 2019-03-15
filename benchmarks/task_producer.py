@@ -3,10 +3,13 @@ import random
 import string
 
 from benchmarks import tasks
-
+from benchmarks import metrics
 
 # Usage:
 #  python benchmarks/task_producer.py
+
+
+myMet = metrics.Metrics()
 
 
 async def produce_disk_io_task() -> None:
@@ -21,6 +24,7 @@ async def produce_disk_io_task() -> None:
             + ".txt"
         )
         await tasks.disk_io_task.delay(filename=filename)
+        await myMet.incr(counter_name="disk_io_task_queued")
 
 
 async def produce_network_io_task() -> None:
@@ -29,6 +33,7 @@ async def produce_network_io_task() -> None:
     """
     for i in range(0, 200_001):
         await tasks.network_io_task.delay()
+        await myMet.incr(counter_name="network_io_task_queued")
 
 
 async def produce_cpu_bound_task() -> None:
@@ -37,6 +42,7 @@ async def produce_cpu_bound_task() -> None:
     """
     for i in range(0, 200_001):
         await tasks.cpu_bound_task.delay()
+        await myMet.incr(counter_name="cpu_bound_task_queued")
 
 
 async def produce_adder_task() -> None:
@@ -46,6 +52,7 @@ async def produce_adder_task() -> None:
     """
     for i in range(0, 200_001):
         await tasks.adder_task.delay(a=90, b=88)
+        await myMet.incr(counter_name="adder_task_queued")
 
 
 async def main() -> None:

@@ -32,3 +32,14 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       IN_DOCKER: yep
+
+  metrics:
+    build:
+      context: .
+    volumes:
+      - ./:/usr/src/app
+    command: python /usr/src/app/benchmarks/metrics.py
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      IN_DOCKER: yep
