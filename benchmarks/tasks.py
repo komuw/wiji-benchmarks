@@ -10,9 +10,10 @@ import wiji
 import wijisqs
 
 
-from benchmarks import redis_broker
+from benchmarks.redis_broker import ExampleRedisBroker
 
-BROKER = redis_broker.ExampleRedisBroker()
+
+BROKER = ExampleRedisBroker()
 # wijisqs.SqsBroker(
 #     aws_region_name=os.environ["aws_region_name"],
 #     aws_access_key_id=os.environ["aws_access_key_id"],
