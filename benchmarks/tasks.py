@@ -67,6 +67,7 @@ class DiskIOTask(wiji.task.Task):
         new_file = open(filename, mode="r")
         new_content = new_file.read()
         new_file.close()
+        print(new_content[:10])
 
         os.remove(filename)
 

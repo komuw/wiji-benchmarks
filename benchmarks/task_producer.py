@@ -41,7 +41,7 @@ async def produce_cpu_bound_task() -> None:
 
 async def main() -> None:
     """
-    main function to produce 
+    main function to produce tasks.
     """
 
     gather_tasks = asyncio.gather(
