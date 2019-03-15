@@ -17,6 +17,7 @@ services:
       aws_secret_access_key: aws_secret_access_key
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      IN_DOCKER: yep
 
   workers:
     build:
@@ -30,3 +31,4 @@ services:
       aws_secret_access_key: aws_secret_access_key
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      IN_DOCKER: yep

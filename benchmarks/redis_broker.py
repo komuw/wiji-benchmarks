@@ -23,7 +23,10 @@ class ExampleRedisBroker(wiji.broker.BaseBroker):
     """
 
     def __init__(self):
-        host = os.environ["REDIS_HOST"]
+        host = "localhost"
+        if os.environ.get("IN_DOCKER"):
+            host = os.environ["REDIS_HOST"]
+
         port = os.environ["REDIS_PORT"]
         self.redis_instance = redis.StrictRedis(host=host, port=port, db=0)
 
