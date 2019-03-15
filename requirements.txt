@@ -1,0 +1,14 @@
+# core requirements
+wiji==0.1.2
+wijisqs==0.1.2
+
+# secondary requirements
+aiohttp==3.5.4
+aiodns==2.0.0
+cchardet==2.1.4
+cryptography==2.6.1
+
+# test requirements
+black==19.3b0
+pylint==2.3.1
+flake8==3.7.7
