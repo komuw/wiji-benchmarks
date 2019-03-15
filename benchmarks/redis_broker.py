@@ -24,10 +24,11 @@ class ExampleRedisBroker(wiji.broker.BaseBroker):
 
     def __init__(self):
         host = "localhost"
+        port = 6379
         if os.environ.get("IN_DOCKER"):
             host = os.environ["REDIS_HOST"]
+            port = os.environ["REDIS_PORT"]
 
-        port = os.environ["REDIS_PORT"]
         self.redis_instance = redis.StrictRedis(host=host, port=port, db=0)
 
     async def check(self, queue_name: str) -> None:
