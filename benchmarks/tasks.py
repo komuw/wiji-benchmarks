@@ -40,7 +40,6 @@ class NetworkIOTask(wiji.task.Task):
 
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as resp:
-                print("resp statsus: ", resp.status)
                 res_text = await resp.text()
                 print(res_text[:50])
 
