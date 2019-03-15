@@ -7,6 +7,8 @@ import tasks
 
 # Usage:
 #  python benchmarks/task_producer.py
+
+
 async def produce_network_io_task() -> None:
     for i in range(0, 200000):
         await tasks.network_io_task.delay()
