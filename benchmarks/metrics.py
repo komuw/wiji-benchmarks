@@ -72,16 +72,21 @@ def main():
 
         met = Metrics()
         metric_names = [
+            # queue
             "disk_io_task_queued",
             "network_io_task_queued",
             "cpu_bound_task_queued",
             "adder_task_queued",
+            # dequeue
+            "network_io_task_DEQUEUED",
+            "disk_io_task_DEQUEUED",
+            "cpu_bound_task_DEQUEUED",
+            "adder_task_DEQUEUED",
+            "divider_task_DEQUEUED",
         ]
         while True:
             for met_name in metric_names:
                 met_count = await met.get(counter_name=met_name)
-                print("\n")
-                print("METRIC: {0}. value: {1}".format(met_name, met_count))
                 logger.log(
                     logging.INFO,
                     {"event": "stream_metric", "metric_name": met_name, "metric_count": met_count},

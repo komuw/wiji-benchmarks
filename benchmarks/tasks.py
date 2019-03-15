@@ -9,8 +9,11 @@ from cryptography.fernet import Fernet
 import wiji
 import wijisqs
 
-
+from benchmarks import metrics
 from benchmarks.redis_broker import ExampleRedisBroker
+
+
+myMet = metrics.Metrics()
 
 
 BROKER = ExampleRedisBroker()
@@ -40,6 +43,8 @@ class NetworkIOTask(wiji.task.Task):
                 print("resp statsus: ", resp.status)
                 res_text = await resp.text()
                 print(res_text[:50])
+
+        await myMet.incr(counter_name="network_io_task_DEQUEUED")
 
 
 network_io_task = NetworkIOTask(the_broker=BROKER, queue_name="NetworkIOTaskQueue")
@@ -71,6 +76,8 @@ class DiskIOTask(wiji.task.Task):
 
         os.remove(filename)
 
+        await myMet.incr(counter_name="disk_io_task_DEQUEUED")
+
 
 disk_io_task = DiskIOTask(the_broker=BROKER, queue_name="DiskIOTaskQueue")
 
@@ -97,6 +104,8 @@ class CPUTask(wiji.task.Task):
         token = f.encrypt(content.encode())
         f.decrypt(token)
 
+        await myMet.incr(counter_name="cpu_bound_task_DEQUEUED")
+
 
 cpu_bound_task = CPUTask(the_broker=BROKER, queue_name="CPUTaskQueue")
 
@@ -109,6 +118,8 @@ class DividerTask(wiji.task.Task):
 
     async def run(self, dividend):
         answer = dividend / 3
+
+        await myMet.incr(counter_name="divider_task_DEQUEUED")
         return answer
 
 
@@ -122,6 +133,8 @@ class AdderTask(wiji.task.Task):
 
     async def run(self, a, b):
         result = a + b
+
+        await myMet.incr(counter_name="adder_task_DEQUEUED")
         return result
 
 
