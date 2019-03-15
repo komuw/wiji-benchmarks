@@ -2,16 +2,11 @@ import asyncio
 import random
 import string
 
-from benchmarks.tasks import *
+from benchmarks import tasks
 
 
 # Usage:
 #  python benchmarks/task_producer.py
-
-
-async def produce_network_io_task() -> None:
-    for i in range(0, 200000):
-        await network_io_task.delay()
 
 
 async def produce_disk_io_task() -> None:
@@ -22,12 +17,17 @@ async def produce_disk_io_task() -> None:
             + str(i)
             + ".txt"
         )
-        await disk_io_task(filename=filename)
+        await tasks.disk_io_task.delay(filename=filename)
+
+
+async def produce_network_io_task() -> None:
+    for i in range(0, 200000):
+        await tasks.network_io_task.delay()
 
 
 async def produce_cpu_bound_task() -> None:
     for i in range(0, 200000):
-        await cpu_bound_task.delay()
+        await tasks.cpu_bound_task.delay()
 
 
 async def main() -> None:
@@ -36,7 +36,7 @@ async def main() -> None:
     """
 
     gather_tasks = asyncio.gather(
-        produce_network_io_task(), produce_disk_io_task(), produce_cpu_bound_task()
+        produce_disk_io_task(), produce_network_io_task(), produce_cpu_bound_task()
     )
     await gather_tasks
 
