@@ -10,15 +10,18 @@ import wiji
 import wijisqs
 
 
-BROKER = wijisqs.SqsBroker(
-    aws_region_name=os.environ["aws_region_name"],
-    aws_access_key_id=os.environ["aws_access_key_id"],
-    aws_secret_access_key=os.environ["aws_secret_access_key"],
-    queue_tags={"name": "wiji.SqsBroker.benchmarks", "url": "https://github.com/komuw/wiji"},
-    loglevel="DEBUG",
-    long_poll=True,
-    batch_send=True,
-)
+from benchmarks import redis_broker
+
+BROKER = redis_broker.ExampleRedisBroker()
+# wijisqs.SqsBroker(
+#     aws_region_name=os.environ["aws_region_name"],
+#     aws_access_key_id=os.environ["aws_access_key_id"],
+#     aws_secret_access_key=os.environ["aws_secret_access_key"],
+#     queue_tags={"name": "wiji.SqsBroker.benchmarks", "url": "https://github.com/komuw/wiji"},
+#     loglevel="DEBUG",
+#     long_poll=True,
+#     batch_send=True,
+# )
 
 
 class NetworkIOTask(wiji.task.Task):
