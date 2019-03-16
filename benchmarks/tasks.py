@@ -58,6 +58,8 @@ class DiskIOTask(wiji.task.Task):
       - opens the file, writes that 16KB text to it, then closes the file
       - opens the file again, reads its content, then closes the file.
       - then it deletes the file
+    
+    this task will also tax your cpu.
     """
 
     async def run(self, *args, **kwargs):
