@@ -55,7 +55,7 @@ class DiskIOTask(wiji.task.Task):
     This task:
       - creates a random file
       - generates a random 16KB text
-      - opens the file, writes that 16KB text to it, then closes the file
+      - opens the file, writes that 16KB text to it, flushes the file, then closes the file
       - opens the file again, reads its content, then closes the file.
       - then it deletes the file
     
@@ -68,6 +68,7 @@ class DiskIOTask(wiji.task.Task):
 
         f = open(filename, mode="a")
         f.write(content)
+        f.flush()
         f.close()
 
         new_file = open(filename, mode="r")
