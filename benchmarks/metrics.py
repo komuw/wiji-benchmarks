@@ -87,6 +87,8 @@ def main():
         while True:
             for met_name in metric_names:
                 met_count = await met.get(counter_name=met_name)
+                if not met_count:
+                    met_count = 0
                 logger.log(
                     logging.INFO,
                     {"event": "stream_metric", "metric_name": met_name, "metric_count": met_count},
