@@ -18,7 +18,8 @@ async def produce_disk_io_task() -> None:
     """
     for i in range(0, 200_001):
         filename = (
-            "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            "/tmp/"
+            + "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
             + "-"
             + str(i)
             + ".txt"

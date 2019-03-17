@@ -65,7 +65,7 @@ class DiskIOTask(wiji.task.Task):
     """
 
     async def run(self, *args, **kwargs):
-        filename = "/tmp/" + kwargs["filename"]
+        filename = kwargs["filename"]
         content = "".join(random.choices(string.ascii_uppercase + string.digits, k=16384))  # 16KB
 
         f = open(filename, mode="a")
