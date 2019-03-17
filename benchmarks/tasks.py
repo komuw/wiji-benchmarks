@@ -34,11 +34,11 @@ else:
 class NetworkIOTask(wiji.task.Task):
     """
     class that simulates a network IO bound task.
-    This task calls a url that has a latency that varies between 6 seconds and 42seconds
+    This task calls a url that has a latency that varies between 2 seconds and 7 seconds
     """
 
     async def run(self, *args, **kwargs):
-        latency = random.randint(6, 42)  # latency in seconds
+        latency = random.randint(2, 7)  # latency in seconds
         url = "https://httpbin.org/delay/{latency}".format(latency=latency)
 
         async with aiohttp.ClientSession() as session:
@@ -58,9 +58,8 @@ class DiskIOTask(wiji.task.Task):
     This task:
       - creates a random file
       - generates a random 16KB text
-      - opens the file, writes that 16KB text to it, flushes the file, then closes the file
-      - opens the file again, reads its content, then closes the file.
-      - then it deletes the file
+      - opens the file, writes that 16KB text to it, fsyncs to disk, then closes that file
+      - finally it deletes the file
 
     this task will also tax your cpu.
     """
@@ -73,11 +72,6 @@ class DiskIOTask(wiji.task.Task):
         f.write(content)
         f.flush()
         f.close()
-
-        new_file = open(filename, mode="r")
-        new_content = new_file.read()
-        new_file.close()
-        print(new_content[:10])
 
         os.remove(filename)
 
