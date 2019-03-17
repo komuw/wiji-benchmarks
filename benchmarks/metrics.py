@@ -84,11 +84,13 @@ def main():
             "adder_task_DEQUEUED",
             "divider_task_DEQUEUED",
         ]
+
         while True:
             for met_name in metric_names:
                 met_count = await met.get(counter_name=met_name)
                 if not met_count:
                     met_count = 0
+                met_count = int(met_count)
                 logger.log(
                     logging.INFO,
                     {"event": "stream_metric", "metric_name": met_name, "metric_count": met_count},
