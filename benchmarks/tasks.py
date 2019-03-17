@@ -16,16 +16,19 @@ from benchmarks.redis_broker import ExampleRedisBroker
 myMet = metrics.Metrics()
 
 
-BROKER = ExampleRedisBroker()
-# wijisqs.SqsBroker(
-#     aws_region_name=os.environ["aws_region_name"],
-#     aws_access_key_id=os.environ["aws_access_key_id"],
-#     aws_secret_access_key=os.environ["aws_secret_access_key"],
-#     queue_tags={"name": "wiji.SqsBroker.benchmarks", "url": "https://github.com/komuw/wiji"},
-#     loglevel="DEBUG",
-#     long_poll=True,
-#     batch_send=True,
-# )
+USE_SQS = os.environ.get("USE_SQS", "NO")
+if USE_SQS == "YES":
+    BROKER = wijisqs.SqsBroker(
+        aws_region_name=os.environ["aws_region_name"],
+        aws_access_key_id=os.environ["aws_access_key_id"],
+        aws_secret_access_key=os.environ["aws_secret_access_key"],
+        queue_tags={"name": "wiji.SqsBroker.benchmarks", "url": "https://github.com/komuw/wiji"},
+        loglevel="DEBUG",
+        long_poll=True,
+        batch_send=True,
+    )
+else:
+    BROKER = ExampleRedisBroker()
 
 
 class NetworkIOTask(wiji.task.Task):
@@ -58,7 +61,7 @@ class DiskIOTask(wiji.task.Task):
       - opens the file, writes that 16KB text to it, flushes the file, then closes the file
       - opens the file again, reads its content, then closes the file.
       - then it deletes the file
-    
+
     this task will also tax your cpu.
     """
 
