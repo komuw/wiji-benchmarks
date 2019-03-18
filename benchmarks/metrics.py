@@ -1,4 +1,5 @@
 import os
+import json
 import typing
 import asyncio
 import functools
@@ -26,7 +27,7 @@ class Metrics:
         self.redis_instance = redis.StrictRedis(host=host, port=port, db=0)
         self.thread_name_prefix = "wiji-benchmarks-metrics-pool"
 
-    async def incr(self, counter_name: str) -> None:
+    async def set(self, key: str, val: dict) -> None:
         try:
             self.loop = asyncio.get_running_loop()
         except RuntimeError:
@@ -36,13 +37,21 @@ class Metrics:
             thread_name_prefix=self.thread_name_prefix
         ) as executor:
             await self.loop.run_in_executor(
-                executor, functools.partial(self._blocking_incr, counter_name=counter_name)
+                executor, functools.partial(self._blocking_set, key=key, val=val)
             )
 
-    def _blocking_incr(self, counter_name: str) -> None:
-        self.redis_instance.incr(counter_name)
+    def _blocking_set(self, key: str, val: typing.Dict[str, typing.Any]) -> None:
+        try:
+            old_val = self.redis_instance.get(key)
+            if old_val:
+                old_val = json.loads(old_val)
+                val.update(old_val)
+        except Exception:
+            pass
 
-    async def get(self, counter_name: str) -> typing.Union[None, str]:
+        self.redis_instance.set(key, json.dumps(val))
+
+    async def get(self, key: str) -> dict:
         try:
             self.loop = asyncio.get_running_loop()
         except RuntimeError:
@@ -51,50 +60,44 @@ class Metrics:
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix=self.thread_name_prefix
         ) as executor:
-            count = await self.loop.run_in_executor(
-                executor, functools.partial(self._blocking_get, counter_name=counter_name)
+            val = await self.loop.run_in_executor(
+                executor, functools.partial(self._blocking_get, key=key)
             )
-            if count:
-                count = count.decode()
-            return count
+            if val:
+                return json.loads(val)
+            else:
+                return {}
 
-    def _blocking_get(self, counter_name: str) -> typing.Union[None, bytes]:
-        return self.redis_instance.get(counter_name)
+    def _blocking_get(self, key: str) -> typing.Dict[str, typing.Any]:
+        val = self.redis_instance.get(key)
+        return val
 
 
 def main():
     async def main() -> None:
         """
         stream metrics as they come in.
+
+        usage:
+            python benchmarks/metrics.py
         """
         logger = wiji.logger.SimpleLogger("metrics_streaming")
         logger.bind(level="INFO", log_metadata={})
 
         met = Metrics()
         metric_names = [
-            # queue
-            "disk_io_task_queued",
-            "network_io_task_queued",
-            "cpu_bound_task_queued",
-            "adder_task_queued",
-            # dequeue
-            "network_io_task_DEQUEUED",
-            "disk_io_task_DEQUEUED",
-            "cpu_bound_task_DEQUEUED",
-            "adder_task_DEQUEUED",
-            "divider_task_DEQUEUED",
+            "network_io_task",
+            "disk_io_task",
+            "cpu_bound_task",
+            "adder_task",
+            "divider_task",
         ]
 
         while True:
+            # NB: the metrics may not have queueing metrics(eg queue_count) until all tasks have been queued
             for met_name in metric_names:
-                met_count = await met.get(counter_name=met_name)
-                if not met_count:
-                    met_count = 0
-                met_count = int(met_count)
-                logger.log(
-                    logging.INFO,
-                    {"event": "stream_metric", "metric_name": met_name, "metric_count": met_count},
-                )
+                val = await met.get(key=met_name)
+                logger.log(logging.INFO, {"event": "stream_metric", "val": val})
 
             await asyncio.sleep(10)
 

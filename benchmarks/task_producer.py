@@ -1,3 +1,4 @@
+import time
 import asyncio
 import random
 import string
@@ -19,6 +20,8 @@ async def produce_disk_io_task() -> None:
     """
     queue 200K of disk IO bound tasks.
     """
+    key = "disk_io_task"
+    val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
     for i in range(0, max_tasks):
         filename = (
             "/tmp/"
@@ -27,26 +30,46 @@ async def produce_disk_io_task() -> None:
             + str(i)
             + ".txt"
         )
+
+        start = time.monotonic()
         await tasks.disk_io_task.delay(filename=filename)
-        await myMet.incr(counter_name="disk_io_task_queued")
+        end = time.monotonic()
+        val["queue_count"] += 1
+        val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))
+
+    await myMet.set(key, val)
 
 
 async def produce_network_io_task() -> None:
     """
     queue 200K of network IO bound tasks.
     """
+    key = "network_io_task"
+    val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
     for i in range(0, max_tasks):
+        start = time.monotonic()
         await tasks.network_io_task.delay()
-        await myMet.incr(counter_name="network_io_task_queued")
+        end = time.monotonic()
+        val["queue_count"] += 1
+        val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))
+
+    await myMet.set(key, val)
 
 
 async def produce_cpu_bound_task() -> None:
     """
     queue 200K of cpu bound tasks.
     """
+    key = "cpu_bound_task"
+    val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
     for i in range(0, max_tasks):
+        start = time.monotonic()
         await tasks.cpu_bound_task.delay()
-        await myMet.incr(counter_name="cpu_bound_task_queued")
+        end = time.monotonic()
+        val["queue_count"] += 1
+        val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))
+
+    await myMet.set(key, val)
 
 
 async def produce_adder_task() -> None:
@@ -54,9 +77,16 @@ async def produce_adder_task() -> None:
     queue 200K of adder tasks.
     Those will in turn generate 200K divider tasks
     """
+    key = "adder_task"
+    val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
     for i in range(0, max_tasks):
+        start = time.monotonic()
         await tasks.adder_task.delay(a=90, b=88)
-        await myMet.incr(counter_name="adder_task_queued")
+        end = time.monotonic()
+        val["queue_count"] += 1
+        val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))
+
+    await myMet.set(key, val)
 
 
 async def main() -> None:
