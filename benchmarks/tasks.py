@@ -117,8 +117,8 @@ class CPUTask(wiji.task.Task):
         h.update(content.encode())
         h.hexdigest()
 
-        key = Fernet.generate_key()
-        f = Fernet(key)
+        fernet_key = Fernet.generate_key()
+        f = Fernet(fernet_key)
         token = f.encrypt(content.encode())
         f.decrypt(token)
 
