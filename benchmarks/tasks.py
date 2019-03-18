@@ -1,9 +1,7 @@
 import os
 import random
 import string
-import typing
 import hashlib
-import logging
 
 import aiohttp
 from cryptography.fernet import Fernet
