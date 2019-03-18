@@ -12,7 +12,7 @@ from benchmarks import metrics
 myMet = metrics.Metrics()
 
 
-max_tasks: int = 200_001
+max_tasks: int = 10_001
 
 
 async def produce_disk_io_task() -> None:
