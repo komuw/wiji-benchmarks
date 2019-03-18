@@ -66,7 +66,7 @@ class ExampleRedisBroker(wiji.broker.BaseBroker):
                 if item:
                     return item
                 else:
-                    await asyncio.sleep(5)
+                    await asyncio.sleep(1 / 117)
 
     def blocking_dequeue(self, queue_name: str):
         dequed_item = self.redis_instance.brpop(queue_name, timeout=3)
