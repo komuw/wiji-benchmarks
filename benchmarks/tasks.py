@@ -56,7 +56,7 @@ class DiskIOTask(wiji.task.Task):
     This task:
       - creates a random file
       - generates a random 16KB text
-      - opens the file, writes that 16KB text to it, fsyncs to disk, then closes that file
+      - opens the file, writes that 16KB text to it & closes that file
       - finally it deletes the file
 
     this task will also tax your cpu.
@@ -68,7 +68,6 @@ class DiskIOTask(wiji.task.Task):
 
         f = open(filename, mode="a")
         f.write(content)
-        f.flush()
         f.close()
 
         os.remove(filename)
