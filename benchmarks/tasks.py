@@ -1,8 +1,9 @@
 import os
-import time
 import random
 import string
+import typing
 import hashlib
+import logging
 
 import aiohttp
 from cryptography.fernet import Fernet
@@ -10,11 +11,11 @@ from cryptography.fernet import Fernet
 import wiji
 import wijisqs
 
-from benchmarks import metrics
+from benchmarks import myHook
 from benchmarks.redis_broker import ExampleRedisBroker
 
 
-myMet = metrics.Metrics()
+myHook = myHook.BenchmarksHook()
 
 
 USE_SQS = os.environ.get("USE_SQS", "NO")
@@ -39,10 +40,6 @@ class NetworkIOTask(wiji.task.Task):
     """
 
     async def run(self, *args, **kwargs):
-        key = "network_io_task"
-        val = {"task_name": key, "DE_queue_count": 0, "time_to_execute_one_task": 0.00}
-        start = time.monotonic()
-
         latency = random.randint(2, 7)  # latency in seconds
         url = "https://httpbin.org/delay/{latency}".format(latency=latency)
 
@@ -51,13 +48,8 @@ class NetworkIOTask(wiji.task.Task):
                 res_text = await resp.text()
                 print(res_text[:50])
 
-        end = time.monotonic()
-        val["DE_queue_count"] += 1
-        val["time_to_execute_one_task"] = float("{0:.2f}".format(end - start))
-        await myMet.set(key, val)
 
-
-network_io_task = NetworkIOTask(the_broker=BROKER, queue_name="NetworkIOTaskQueue")
+network_io_task = NetworkIOTask(the_broker=BROKER, queue_name="NetworkIOTaskQueue", the_hook=myHook)
 
 
 class DiskIOTask(wiji.task.Task):
@@ -73,10 +65,6 @@ class DiskIOTask(wiji.task.Task):
     """
 
     async def run(self, *args, **kwargs):
-        key = "disk_io_task"
-        val = {"task_name": key, "DE_queue_count": 0, "time_to_execute_one_task": 0.00}
-        start = time.monotonic()
-
         filename = kwargs["filename"]
         content = "".join(random.choices(string.ascii_uppercase + string.digits, k=16384))  # 16KB
 
@@ -87,13 +75,8 @@ class DiskIOTask(wiji.task.Task):
 
         os.remove(filename)
 
-        end = time.monotonic()
-        val["DE_queue_count"] += 1
-        val["time_to_execute_one_task"] = float("{0:.2f}".format(end - start))
-        await myMet.set(key, val)
 
-
-disk_io_task = DiskIOTask(the_broker=BROKER, queue_name="DiskIOTaskQueue")
+disk_io_task = DiskIOTask(the_broker=BROKER, queue_name="DiskIOTaskQueue", the_hook=myHook)
 
 
 class CPUTask(wiji.task.Task):
@@ -107,10 +90,6 @@ class CPUTask(wiji.task.Task):
     """
 
     async def run(self, *args, **kwargs):
-        key = "cpu_bound_task"
-        val = {"task_name": key, "DE_queue_count": 0, "time_to_execute_one_task": 0.00}
-        start = time.monotonic()
-
         content = "".join(random.choices(string.ascii_uppercase + string.digits, k=16384))  # 16KB
 
         h = hashlib.blake2b()
@@ -122,13 +101,8 @@ class CPUTask(wiji.task.Task):
         token = f.encrypt(content.encode())
         f.decrypt(token)
 
-        end = time.monotonic()
-        val["DE_queue_count"] += 1
-        val["time_to_execute_one_task"] = float("{0:.2f}".format(end - start))
-        await myMet.set(key, val)
 
-
-cpu_bound_task = CPUTask(the_broker=BROKER, queue_name="CPUTaskQueue")
+cpu_bound_task = CPUTask(the_broker=BROKER, queue_name="CPUTaskQueue", the_hook=myHook)
 
 
 class DividerTask(wiji.task.Task):
@@ -138,21 +112,11 @@ class DividerTask(wiji.task.Task):
     """
 
     async def run(self, dividend):
-        key = "divider_task"
-        val = {"task_name": key, "DE_queue_count": 0, "time_to_execute_one_task": 0.00}
-        start = time.monotonic()
-
         answer = dividend / 3
-
-        end = time.monotonic()
-        val["DE_queue_count"] += 1
-        val["time_to_execute_one_task"] = float("{0:.2f}".format(end - start))
-        await myMet.set(key, val)
-
         return answer
 
 
-divider_task = DividerTask(the_broker=BROKER, queue_name="DividerTaskQueue")
+divider_task = DividerTask(the_broker=BROKER, queue_name="DividerTaskQueue", the_hook=myHook)
 
 
 class AdderTask(wiji.task.Task):
@@ -161,18 +125,10 @@ class AdderTask(wiji.task.Task):
     """
 
     async def run(self, a, b):
-        key = "adder_task"
-        val = {"task_name": key, "DE_queue_count": 0, "time_to_execute_one_task": 0.00}
-        start = time.monotonic()
-
         result = a + b
-
-        end = time.monotonic()
-        val["DE_queue_count"] += 1
-        val["time_to_execute_one_task"] = float("{0:.2f}".format(end - start))
-        await myMet.set(key, val)
-
         return result
 
 
-adder_task = AdderTask(the_broker=BROKER, chain=divider_task, queue_name="AdderTaskQueue")
+adder_task = AdderTask(
+    the_broker=BROKER, chain=divider_task, queue_name="AdderTaskQueue", the_hook=myHook
+)
