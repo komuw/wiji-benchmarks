@@ -45,7 +45,8 @@ class Metrics:
             old_val = self.redis_instance.get(key)
             if old_val:
                 old_val = json.loads(old_val)
-                val.update(old_val)
+                old_val.update(val)
+                val = old_val
         except Exception:
             pass
 
@@ -71,6 +72,23 @@ class Metrics:
     def _blocking_get(self, key: str) -> typing.Dict[str, typing.Any]:
         val = self.redis_instance.get(key)
         return val
+
+    async def incr(self, counter_name: str) -> None:
+        try:
+            self.loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self.loop = asyncio.get_event_loop()
+
+        with concurrent.futures.ThreadPoolExecutor(
+            thread_name_prefix=self.thread_name_prefix
+        ) as executor:
+            counter = await self.loop.run_in_executor(
+                executor, functools.partial(self._blocking_incr, counter_name=counter_name)
+            )
+            return counter
+
+    def _blocking_incr(self, counter_name: str) -> None:
+        return self.redis_instance.incrby(counter_name)
 
 
 def main():
