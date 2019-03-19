@@ -62,8 +62,7 @@ class DiskIOTask(wiji.task.Task):
     this task will also tax your cpu.
     """
 
-    async def run(self, *args, **kwargs):
-        filename = kwargs["filename"]
+    async def run(self, filename):
         content = "".join(random.choices(string.ascii_uppercase + string.digits, k=16384))  # 16KB
 
         f = open(filename, mode="a")
