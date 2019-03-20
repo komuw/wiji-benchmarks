@@ -1,3 +1,4 @@
+import sys
 import typing
 import logging
 
@@ -32,6 +33,13 @@ class BenchmarksHook(wiji.hook.BaseHook):
         execution_exception: typing.Union[None, Exception] = None,
         return_value: typing.Union[None, typing.Any] = None,
     ) -> None:
+        try:
+            if not isinstance(execution_exception, type(None)):
+                raise ValueError("task produced error") from execution_exception
+        except Exception as e:
+            # yep, we are serious that this benchmarks should complete without error
+            # else we exit
+            sys.exit(99)
 
         if state == wiji.task.TaskState.EXECUTED:
             key = self.lookup[task_name]
