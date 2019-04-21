@@ -1,6 +1,6 @@
 # core requirements
-wiji==0.1.6b2
-wijisqs==0.3.0b1
+wiji==0.1.6b3
+wijisqs==0.4.0b1
 
 # secondary requirements
 aiohttp==3.5.4
@@ -10,7 +10,7 @@ cryptography==2.6.1
 redis==3.2.0
 
 # test requirements
-black==19.3b0
-pylint==2.3.1
-flake8==3.7.7
-mypy==0.670
+black
+pylint
+flake8
+mypy
