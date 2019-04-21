@@ -125,7 +125,8 @@ class DividerTask(wiji.task.Task):
 
 class AdderTask(wiji.task.Task):
     """
-    task that adds two numbers together
+    task that adds two numbers together.
+    the result of this task is then passed over to the DividerTask as an argument
     """
 
     the_broker = BROKER
