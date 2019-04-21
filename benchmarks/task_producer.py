@@ -13,7 +13,7 @@ from benchmarks import metrics
 myMet = metrics.Metrics()
 
 
-max_tasks: int = 10_001
+max_tasks: int = 10001
 
 
 async def produce_disk_io_task() -> None:
@@ -32,7 +32,7 @@ async def produce_disk_io_task() -> None:
         )
 
         start = time.monotonic()
-        await tasks.disk_io_task.delay(filename=filename)
+        await tasks.DiskIOTask().delay(filename=filename)
         end = time.monotonic()
         val["queue_count"] += 1
         val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))
@@ -48,7 +48,7 @@ async def produce_network_io_task() -> None:
     val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
     for i in range(0, max_tasks):
         start = time.monotonic()
-        await tasks.network_io_task.delay()
+        await tasks.NetworkIOTask().delay()
         end = time.monotonic()
         val["queue_count"] += 1
         val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))
@@ -64,7 +64,7 @@ async def produce_cpu_bound_task() -> None:
     val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
     for i in range(0, max_tasks):
         start = time.monotonic()
-        await tasks.cpu_bound_task.delay()
+        await tasks.CPUTask().delay()
         end = time.monotonic()
         val["queue_count"] += 1
         val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))
@@ -81,7 +81,7 @@ async def produce_adder_task() -> None:
     val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
     for i in range(0, max_tasks):
         start = time.monotonic()
-        await tasks.adder_task.delay(a=90, b=88)
+        await tasks.AdderTask().delay(a=90, b=88)
         end = time.monotonic()
         val["queue_count"] += 1
         val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))

@@ -39,6 +39,7 @@ class BenchmarksHook(wiji.hook.BaseHook):
         except Exception as e:
             # yep, we are serious that this benchmarks should complete without error
             # else we exit
+            print("BenchmarksHook:: error={0}".format(str(e)))
             sys.exit(99)
 
         if state == wiji.task.TaskState.EXECUTED:

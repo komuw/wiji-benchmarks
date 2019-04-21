@@ -4,14 +4,14 @@ import wiji
 from benchmarks import tasks
 
 # Usage:
-#   wiji-cli --config benchmarks.wiji_app.myConf
+#   wiji-cli --config benchmarks.wiji_app.myApp
 
-myConf = wiji.conf.WijiConf(
-    tasks=[
-        tasks.network_io_task,
-        tasks.disk_io_task,
-        tasks.cpu_bound_task,
-        tasks.divider_task,
-        tasks.adder_task,
+myApp = wiji.app.App(
+    task_classes=[
+        tasks.NetworkIOTask,
+        tasks.DiskIOTask,
+        tasks.CPUTask,
+        tasks.DividerTask,
+        tasks.AdderTask,
     ]
 )
