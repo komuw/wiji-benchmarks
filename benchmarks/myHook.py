@@ -14,14 +14,6 @@ class BenchmarksHook(wiji.hook.BaseHook):
     def __init__(self,) -> None:
         self.logger = wiji.logger.SimpleLogger("wiji.benchmarks.BenchmarksHook")
 
-        self.lookup = {
-            "NetworkIOTask": "network_io_task",
-            "DiskIOTask": "disk_io_task",
-            "CPUTask": "cpu_bound_task",
-            "AdderTask": "adder_task",
-            "DividerTask": "divider_task",
-        }
-
     async def notify(
         self,
         task_name: str,
@@ -56,45 +48,31 @@ class BenchmarksHook(wiji.hook.BaseHook):
             )
             sys.exit(99)
 
-        try:
-            if state == wiji.task.TaskState.EXECUTED:
-                key = self.lookup[task_name]
-                time_to_execute_one_task = float("{0:.2f}".format(execution_duration["monotonic"]))
+        if state == wiji.task.TaskState.EXECUTED:
+            key = task_name
+            time_to_execute_one_task = float("{0:.2f}".format(execution_duration["monotonic"]))
 
-                counter = await myMet.incr(counter_name=task_name)  # key raises a redis Error
-                val = {
-                    "task_name": key,
-                    "DE_queue_count": counter,
-                    "time_to_execute_one_task": time_to_execute_one_task,
-                }
-                await myMet.set(key, val)
+            counter = await myMet.incr(
+                counter_name="counter_{0}".format(task_name)
+            )  # key raises a redis Error
+            val = {
+                "task_name": key,
+                "DE_queue_count": counter,
+                "time_to_execute_one_task": time_to_execute_one_task,
+            }
+            await myMet.set(key, val)
 
-                self.logger.log(
-                    logging.INFO,
-                    {
-                        "event": "wiji.BenchmarksHook.notify",
-                        "stage": "start",
-                        "state": state,
-                        "task_name": task_name,
-                        "queue_name": queue_name,
-                        "execution_exception": str(execution_exception),
-                        "return_value": str(return_value),
-                        "key": key,
-                        "val": val,
-                    },
-                )
-        except Exception as e:
             self.logger.log(
                 logging.INFO,
                 {
                     "event": "wiji.BenchmarksHook.notify",
-                    "stage": "error",
-                    "error": str(e),
+                    "stage": "start",
                     "state": state,
                     "task_name": task_name,
                     "queue_name": queue_name,
                     "execution_exception": str(execution_exception),
                     "return_value": str(return_value),
+                    "key": key,
+                    "val": val,
                 },
             )
-            pass

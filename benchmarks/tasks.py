@@ -39,6 +39,7 @@ class NetworkIOTask(wiji.task.Task):
 
     the_broker = BROKER
     queue_name = "NetworkIOTask"
+    task_name = queue_name
     the_hook = myHook
 
     async def run(self, *args, **kwargs):
@@ -65,6 +66,7 @@ class DiskIOTask(wiji.task.Task):
 
     the_broker = BROKER
     queue_name = "DiskIOTask"
+    task_name = queue_name
     the_hook = myHook
 
     async def run(self, filename):
@@ -89,6 +91,7 @@ class CPUTask(wiji.task.Task):
 
     the_broker = BROKER
     queue_name = "CPUTask"
+    task_name = queue_name
     the_hook = myHook
 
     async def run(self, *args, **kwargs):
@@ -112,6 +115,7 @@ class DividerTask(wiji.task.Task):
 
     the_broker = BROKER
     queue_name = "DividerTask"
+    task_name = queue_name
     the_hook = myHook
 
     async def run(self, dividend):
@@ -126,6 +130,7 @@ class AdderTask(wiji.task.Task):
 
     the_broker = BROKER
     queue_name = "AdderTask"
+    task_name = queue_name
     the_hook = myHook
     chain = DividerTask
 
