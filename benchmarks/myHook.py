@@ -35,36 +35,66 @@ class BenchmarksHook(wiji.hook.BaseHook):
     ) -> None:
         try:
             if not isinstance(execution_exception, type(None)):
-                raise ValueError("task produced error") from execution_exception
+                raise ValueError(
+                    "task produced error. task_name={0}".format(task_name)
+                ) from execution_exception
         except Exception as e:
             # yep, we are serious that this benchmarks should complete without error
             # else we exit
-            print("BenchmarksHook:: error={0}".format(str(e)))
-            sys.exit(99)
-
-        if state == wiji.task.TaskState.EXECUTED:
-            key = self.lookup[task_name]
-            time_to_execute_one_task = float("{0:.2f}".format(execution_duration["monotonic"]))
-
-            counter = await myMet.incr(counter_name=task_name)  # key raises a redis Error
-            val = {
-                "task_name": key,
-                "DE_queue_count": counter,
-                "time_to_execute_one_task": time_to_execute_one_task,
-            }
-            await myMet.set(key, val)
-
             self.logger.log(
-                logging.INFO,
+                logging.ERROR,
                 {
                     "event": "wiji.BenchmarksHook.notify",
-                    "stage": "start",
+                    "stage": "end",
+                    "error": str(e),
                     "state": state,
                     "task_name": task_name,
                     "queue_name": queue_name,
                     "execution_exception": str(execution_exception),
                     "return_value": str(return_value),
-                    "key": key,
-                    "val": val,
                 },
             )
+            sys.exit(99)
+
+        try:
+            if state == wiji.task.TaskState.EXECUTED:
+                key = self.lookup[task_name]
+                time_to_execute_one_task = float("{0:.2f}".format(execution_duration["monotonic"]))
+
+                counter = await myMet.incr(counter_name=task_name)  # key raises a redis Error
+                val = {
+                    "task_name": key,
+                    "DE_queue_count": counter,
+                    "time_to_execute_one_task": time_to_execute_one_task,
+                }
+                await myMet.set(key, val)
+
+                self.logger.log(
+                    logging.INFO,
+                    {
+                        "event": "wiji.BenchmarksHook.notify",
+                        "stage": "start",
+                        "state": state,
+                        "task_name": task_name,
+                        "queue_name": queue_name,
+                        "execution_exception": str(execution_exception),
+                        "return_value": str(return_value),
+                        "key": key,
+                        "val": val,
+                    },
+                )
+        except Exception as e:
+            self.logger.log(
+                logging.INFO,
+                {
+                    "event": "wiji.BenchmarksHook.notify",
+                    "stage": "error",
+                    "error": str(e),
+                    "state": state,
+                    "task_name": task_name,
+                    "queue_name": queue_name,
+                    "execution_exception": str(execution_exception),
+                    "return_value": str(return_value),
+                },
+            )
+            pass
