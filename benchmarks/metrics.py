@@ -9,6 +9,8 @@ import logging
 import redis
 import wiji
 
+from benchmarks import tasks
+
 
 class Metrics:
     """
@@ -103,12 +105,13 @@ def main():
         logger.bind(level="INFO", log_metadata={})
 
         met = Metrics()
+
         metric_names = [
-            "network_io_task",
-            "disk_io_task",
-            "cpu_bound_task",
-            "adder_task",
-            "divider_task",
+            tasks.NetworkIOTask.task_name,
+            tasks.DiskIOTask.task_name,
+            tasks.CPUTask.task_name,
+            tasks.DividerTask.task_name,
+            tasks.AdderTask.task_name,
         ]
 
         while True:

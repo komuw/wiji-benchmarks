@@ -14,14 +14,6 @@ class BenchmarksHook(wiji.hook.BaseHook):
     def __init__(self,) -> None:
         self.logger = wiji.logger.SimpleLogger("wiji.benchmarks.BenchmarksHook")
 
-        self.lookup = {
-            "NetworkIOTask": "network_io_task",
-            "DiskIOTask": "disk_io_task",
-            "CPUTask": "cpu_bound_task",
-            "AdderTask": "adder_task",
-            "DividerTask": "divider_task",
-        }
-
     async def notify(
         self,
         task_name: str,
@@ -35,17 +27,34 @@ class BenchmarksHook(wiji.hook.BaseHook):
     ) -> None:
         try:
             if not isinstance(execution_exception, type(None)):
-                raise ValueError("task produced error") from execution_exception
+                raise ValueError(
+                    "task produced error. task_name={0}".format(task_name)
+                ) from execution_exception
         except Exception as e:
             # yep, we are serious that this benchmarks should complete without error
             # else we exit
+            self.logger.log(
+                logging.ERROR,
+                {
+                    "event": "wiji.BenchmarksHook.notify",
+                    "stage": "end",
+                    "error": str(e),
+                    "state": state,
+                    "task_name": task_name,
+                    "queue_name": queue_name,
+                    "execution_exception": str(execution_exception),
+                    "return_value": str(return_value),
+                },
+            )
             sys.exit(99)
 
         if state == wiji.task.TaskState.EXECUTED:
-            key = self.lookup[task_name]
+            key = task_name
             time_to_execute_one_task = float("{0:.2f}".format(execution_duration["monotonic"]))
 
-            counter = await myMet.incr(counter_name=task_name)  # key raises a redis Error
+            counter = await myMet.incr(
+                counter_name="counter_{0}".format(task_name)
+            )  # key raises a redis Error
             val = {
                 "task_name": key,
                 "DE_queue_count": counter,
