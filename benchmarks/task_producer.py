@@ -1,28 +1,22 @@
-import time
 import asyncio
 import random
 import string
 
 from benchmarks import tasks
-from benchmarks import metrics
+
 
 # Usage:
 #  python benchmarks/task_producer.py
 
 
-myMet = metrics.Metrics()
-
-
-max_tasks: int = 10001
+max_tasks_to_queue: int = 10_000
 
 
 async def produce_disk_io_task() -> None:
     """
-    queue `max_tasks` of disk IO bound tasks.
+    queue `max_tasks_to_queue` of disk IO bound tasks.
     """
-    key = tasks.DiskIOTask.task_name
-    val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
-    for i in range(0, max_tasks):
+    for i in range(0, max_tasks_to_queue):
         filename = (
             "/tmp/"
             + "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
@@ -30,79 +24,40 @@ async def produce_disk_io_task() -> None:
             + str(i)
             + ".txt"
         )
-
-        start = time.monotonic()
         await tasks.DiskIOTask().delay(filename=filename)
-        end = time.monotonic()
-        val["queue_count"] += 1
-        val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))
-
-    await myMet.set(key, val)
 
 
 async def produce_network_io_task() -> None:
     """
-    queue `max_tasks` of network IO bound tasks.
+    queue `max_tasks_to_queue` of network IO bound tasks.
     """
-    key = tasks.NetworkIOTask.task_name
-    val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
-    for i in range(0, max_tasks):
-        start = time.monotonic()
+    for i in range(0, max_tasks_to_queue):
         await tasks.NetworkIOTask().delay()
-        end = time.monotonic()
-        val["queue_count"] += 1
-        val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))
-
-    await myMet.set(key, val)
 
 
 async def produce_cpu_bound_task() -> None:
     """
-    queue `max_tasks` of cpu bound tasks.
+    queue `max_tasks_to_queue` of cpu bound tasks.
     """
-    key = tasks.CPUTask.task_name
-    val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
-    for i in range(0, max_tasks):
-        start = time.monotonic()
+    for i in range(0, max_tasks_to_queue):
         await tasks.CPUTask().delay()
-        end = time.monotonic()
-        val["queue_count"] += 1
-        val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))
-
-    await myMet.set(key, val)
 
 
 async def produce_ram_bound_task() -> None:
     """
-    queue `max_tasks` of RAM bound tasks.
+    queue `max_tasks_to_queue` of RAM bound tasks.
     """
-    key = tasks.MemTask.task_name
-    val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
-    for i in range(0, max_tasks):
-        start = time.monotonic()
+    for i in range(0, max_tasks_to_queue):
         await tasks.MemTask().delay()
-        end = time.monotonic()
-        val["queue_count"] += 1
-        val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))
-
-    await myMet.set(key, val)
 
 
 async def produce_adder_task() -> None:
     """
-    queue `max_tasks` of adder tasks.
-    Those will in turn generate `max_tasks` divider tasks
+    queue `max_tasks_to_queue` of adder tasks.
+    Those will in turn generate `max_tasks_to_queue` divider tasks
     """
-    key = tasks.AdderTask.task_name
-    val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
-    for i in range(0, max_tasks):
-        start = time.monotonic()
+    for i in range(0, max_tasks_to_queue):
         await tasks.AdderTask().delay(a=90, b=88)
-        end = time.monotonic()
-        val["queue_count"] += 1
-        val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))
-
-    await myMet.set(key, val)
 
 
 async def main() -> None:
