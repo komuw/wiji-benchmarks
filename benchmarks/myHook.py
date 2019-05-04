@@ -21,6 +21,8 @@ class BenchmarksHook(wiji.hook.BaseHook):
         queue_name: str,
         hook_metadata: str,
         state: wiji.task.TaskState,
+        queuing_duration: typing.Union[None, typing.Dict[str, float]] = None,
+        queuing_exception: typing.Union[None, Exception] = None,
         execution_duration: typing.Union[None, typing.Dict[str, float]] = None,
         execution_exception: typing.Union[None, Exception] = None,
         return_value: typing.Union[None, typing.Any] = None,
@@ -48,19 +50,38 @@ class BenchmarksHook(wiji.hook.BaseHook):
             )
             sys.exit(99)
 
-        if state == wiji.task.TaskState.EXECUTED:
-            key = task_name
-            time_to_execute_one_task = float("{0:.2f}".format(execution_duration["monotonic"]))
-
-            counter = await myMet.incr(
-                counter_name="counter_{0}".format(task_name)
-            )  # key raises a redis Error
+        if state == wiji.task.TaskState.QUEUED:
+            queuing_duration = float("{0:.2f}".format(queuing_duration["monotonic"]))
+            tasks_queued = await myMet.incr(
+                counter_name="tasks_queued_counter_{0}".format(task_name)
+            )
             val = {
-                "task_name": key,
-                "DE_queue_count": counter,
-                "time_to_execute_one_task": time_to_execute_one_task,
+                "task_name": task_name,
+                "tasks_queued": tasks_queued,
+                "queuing_duration": queuing_duration,
             }
-            await myMet.set(key, val)
+            await myMet.set(task_name + "_queuing_duration", val)
+            self.logger.log(
+                logging.INFO,
+                {
+                    "event": "wiji.BenchmarksHook.notify",
+                    "state": state,
+                    "task_name": task_name,
+                    "queue_name": queue_name,
+                },
+            )
+
+        elif state == wiji.task.TaskState.EXECUTED:
+            execution_duration = float("{0:.2f}".format(execution_duration["monotonic"]))
+            tasks_dequeued = await myMet.incr(
+                counter_name="tasks_dequeued_counter_{0}".format(task_name)
+            )
+            val = {
+                "task_name": task_name,
+                "tasks_dequeued": tasks_dequeued,
+                "execution_duration": execution_duration,
+            }
+            await myMet.set(task_name + "_execution_duration", val)
 
             self.logger.log(
                 logging.INFO,
@@ -72,7 +93,5 @@ class BenchmarksHook(wiji.hook.BaseHook):
                     "queue_name": queue_name,
                     "execution_exception": str(execution_exception),
                     "return_value": str(return_value),
-                    "key": key,
-                    "val": val,
                 },
             )

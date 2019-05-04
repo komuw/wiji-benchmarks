@@ -39,6 +39,29 @@ class BaseTask(wiji.task.Task):
     loglevel = "INFO"
 
 
+class DiskIOTask(BaseTask):
+    """
+    class that simulates a disk IO bound task.
+    This task:
+      - creates a random file
+      - generates a random 16KB text
+      - opens the file, writes that 16KB text to it & closes that file
+      - finally it deletes the file
+
+    this task will also tax your cpu.
+    """
+
+    queue_name = "DiskIOTask"
+    task_name = "task_name-{0}".format(queue_name)
+
+    async def run(self, filename):
+        content = "".join(random.choices(string.ascii_uppercase + string.digits, k=16384))  # 16KB
+        f = open(filename, mode="a")
+        f.write(content)
+        f.close()
+        os.remove(filename)
+
+
 class NetworkIOTask(BaseTask):
     """
     class that simulates a network IO bound task.
@@ -58,31 +81,6 @@ class NetworkIOTask(BaseTask):
                 self.logger.log(
                     logging.INFO, {"event": "NetworkIOTask_run", "response": res_text[:50]}
                 )
-
-
-class DiskIOTask(BaseTask):
-    """
-    class that simulates a disk IO bound task.
-    This task:
-      - creates a random file
-      - generates a random 16KB text
-      - opens the file, writes that 16KB text to it & closes that file
-      - finally it deletes the file
-
-    this task will also tax your cpu.
-    """
-
-    queue_name = "DiskIOTask"
-    task_name = "task_name-{0}".format(queue_name)
-
-    async def run(self, filename):
-        content = "".join(random.choices(string.ascii_uppercase + string.digits, k=16384))  # 16KB
-
-        f = open(filename, mode="a")
-        f.write(content)
-        f.close()
-
-        os.remove(filename)
 
 
 class CPUTask(BaseTask):

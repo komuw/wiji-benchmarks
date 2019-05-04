@@ -26,44 +26,41 @@ class Metrics:
         if os.environ.get("IN_DOCKER"):
             host = os.environ["REDIS_HOST"]
             port = os.environ["REDIS_PORT"]
-        self.redis_instance = redis.StrictRedis(host=host, port=port, db=0)
+        self.redis_instance = redis.StrictRedis(
+            host=host, port=port, db=0, socket_connect_timeout=8, socket_timeout=8
+        )
         self.thread_name_prefix = "wiji-benchmarks-metrics-pool"
+        self._LOOP: typing.Union[None, asyncio.events.AbstractEventLoop] = None
+
+    def _get_loop(self,):
+        if self._LOOP:
+            return self._LOOP
+        try:
+            loop: asyncio.events.AbstractEventLoop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop: asyncio.events.AbstractEventLoop = asyncio.get_event_loop()
+        except Exception as e:
+            raise e
+        # cache event loop
+        self._LOOP = loop
+        return loop
 
     async def set(self, key: str, val: dict) -> None:
-        try:
-            self.loop = asyncio.get_running_loop()
-        except RuntimeError:
-            self.loop = asyncio.get_event_loop()
-
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix=self.thread_name_prefix
         ) as executor:
-            await self.loop.run_in_executor(
+            await self._get_loop().run_in_executor(
                 executor, functools.partial(self._blocking_set, key=key, val=val)
             )
 
     def _blocking_set(self, key: str, val: typing.Dict[str, typing.Any]) -> None:
-        try:
-            old_val = self.redis_instance.get(key)
-            if old_val:
-                old_val = json.loads(old_val)
-                old_val.update(val)
-                val = old_val
-        except Exception:
-            pass
-
         self.redis_instance.set(key, json.dumps(val))
 
     async def get(self, key: str) -> dict:
-        try:
-            self.loop = asyncio.get_running_loop()
-        except RuntimeError:
-            self.loop = asyncio.get_event_loop()
-
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix=self.thread_name_prefix
         ) as executor:
-            val = await self.loop.run_in_executor(
+            val = await self._get_loop().run_in_executor(
                 executor, functools.partial(self._blocking_get, key=key)
             )
             if val:
@@ -76,15 +73,10 @@ class Metrics:
         return val
 
     async def incr(self, counter_name: str) -> None:
-        try:
-            self.loop = asyncio.get_running_loop()
-        except RuntimeError:
-            self.loop = asyncio.get_event_loop()
-
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix=self.thread_name_prefix
         ) as executor:
-            counter = await self.loop.run_in_executor(
+            counter = await self._get_loop().run_in_executor(
                 executor, functools.partial(self._blocking_incr, counter_name=counter_name)
             )
             return counter
@@ -106,7 +98,7 @@ def main():
 
         met = Metrics()
 
-        metric_names = [
+        task_names = [
             tasks.NetworkIOTask.task_name,
             tasks.DiskIOTask.task_name,
             tasks.CPUTask.task_name,
@@ -115,11 +107,18 @@ def main():
             tasks.AdderTask.task_name,
         ]
 
+        metric_names = []
+        for t_name in task_names:
+            metric_names.append(t_name + "_queuing_duration")
+            metric_names.append(t_name + "_execution_duration")
+
         while True:
             # NB: the metrics may not have queueing metrics(eg queue_count) until all tasks have been queued
             for met_name in metric_names:
                 val = await met.get(key=met_name)
-                logger.log(logging.INFO, {"event": "stream_metric", "val": val})
+                logger.log(
+                    logging.INFO, {"event": "stream_metric", "val": val, "met_name": met_name}
+                )
 
             await asyncio.sleep(10)
 
