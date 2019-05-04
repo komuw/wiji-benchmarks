@@ -1,6 +1,6 @@
 # core requirements
-wiji==0.1.6b3
-wijisqs==0.4.0b1
+wiji==0.1.6
+wijisqs==0.4.0
 
 # secondary requirements
 aiohttp==3.5.4
