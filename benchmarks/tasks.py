@@ -2,6 +2,7 @@ import os
 import sys
 import random
 import string
+import logging
 import hashlib
 
 import aiohttp
@@ -54,7 +55,9 @@ class NetworkIOTask(BaseTask):
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as resp:
                 res_text = await resp.text()
-                print(res_text[:50])
+                self.logger.log(
+                    logging.INFO, {"event": "NetworkIOTask_run", "response": res_text[:50]}
+                )
 
 
 class DiskIOTask(BaseTask):
@@ -136,7 +139,15 @@ class MemTask(BaseTask):
         target_size = int(0.1 * free_ram)
         stored_string = "a"
         stored_string = stored_string * target_size
-        print("111. size of stored_string string: {0} bytes".format(sys.getsizeof(stored_string)))
+        stored_string_size = sys.getsizeof(stored_string)
+        self.logger.log(
+            logging.INFO,
+            {
+                "event": "MemTask_run",
+                "stored_string_size_bytes": stored_string_size,
+                "stored_string_size_MB": stored_string_size / 1_000_000,
+            },
+        )
         del stored_string
 
 
