@@ -28,16 +28,12 @@ class BenchmarksHook(wiji.hook.BaseHook):
             # record host metrics only once in a while
             mem = psutil.virtual_memory()
             total_ram = mem.total / 1_000_000
-            used_ram = mem.used / 1_000_000
-            free_ram = mem.free / 1_000_000
-
             cpu_percent = CURRENT_PROCESS.cpu_percent() / psutil.cpu_count()
             process_id = CURRENT_PROCESS.pid
 
             val = {
                 "total_ram": total_ram,
-                "used_ram": used_ram,
-                "free_ram": free_ram,
+                "rss_mem": CURRENT_PROCESS.memory_info().rss / 1_000_000,
                 "cpu_percent": cpu_percent,
                 "process_id": process_id,
             }
