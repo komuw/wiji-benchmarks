@@ -28,9 +28,30 @@ class BenchmarksHook(wiji.hook.BaseHook):
         return_value: typing.Union[None, typing.Any] = None,
     ) -> None:
         try:
+            if not isinstance(queuing_exception, type(None)):
+                raise ValueError(
+                    "task Queuing produced error. task_name={0}".format(task_name)
+                ) from queuing_exception
+        except Exception as e:
+            # yep, we are serious that this benchmarks should complete without error
+            # else we exit
+            self.logger.log(
+                logging.ERROR,
+                {
+                    "event": "wiji.BenchmarksHook.notify",
+                    "stage": "end",
+                    "error": str(e),
+                    "state": state,
+                    "task_name": task_name,
+                    "queue_name": queue_name,
+                    "queuing_exception": str(queuing_exception),
+                },
+            )
+            sys.exit(98)
+        try:
             if not isinstance(execution_exception, type(None)):
                 raise ValueError(
-                    "task produced error. task_name={0}".format(task_name)
+                    "task Execution produced error. task_name={0}".format(task_name)
                 ) from execution_exception
         except Exception as e:
             # yep, we are serious that this benchmarks should complete without error
@@ -62,7 +83,7 @@ class BenchmarksHook(wiji.hook.BaseHook):
             }
             await myMet.set(task_name + "_queuing_duration", val)
             self.logger.log(
-                logging.INFO,
+                logging.DEBUG,
                 {
                     "event": "wiji.BenchmarksHook.notify",
                     "state": state,
@@ -84,7 +105,7 @@ class BenchmarksHook(wiji.hook.BaseHook):
             await myMet.set(task_name + "_execution_duration", val)
 
             self.logger.log(
-                logging.INFO,
+                logging.DEBUG,
                 {
                     "event": "wiji.BenchmarksHook.notify",
                     "stage": "start",
