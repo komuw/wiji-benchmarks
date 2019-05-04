@@ -19,9 +19,9 @@ myHook = myHook.BenchmarksHook()
 USE_SQS = os.environ.get("USE_SQS", "NO")
 if USE_SQS == "YES":
     BROKER = wijisqs.SqsBroker(
-        aws_region_name=os.environ["aws_region_name"],
-        aws_access_key_id=os.environ["aws_access_key_id"],
-        aws_secret_access_key=os.environ["aws_secret_access_key"],
+        AWS_REGION_NAME=os.environ["AWS_REGION_NAME"],
+        AWS_ACCESS_KEY_ID=os.environ["AWS_ACCESS_KEY_ID"],
+        AWS_SECRET_ACCESS_KEY=os.environ["AWS_SECRET_ACCESS_KEY"],
         queue_tags={"name": "wiji.SqsBroker.benchmarks", "url": "https://github.com/komuw/wiji"},
         loglevel="DEBUG",
         long_poll=True,

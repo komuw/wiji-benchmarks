@@ -12,14 +12,8 @@ services:
     volumes:
       - ./:/usr/src/app
     command: python /usr/src/app/benchmarks/task_producer.py
-    environment:
-      aws_region_name: aws_region_name
-      aws_access_key_id: aws_access_key_id
-      aws_secret_access_key: aws_secret_access_key
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      IN_DOCKER: yep
-      USE_SQS: "NO"
+    env_file:
+      - compose.env
 
   workers:
     build:
@@ -27,14 +21,8 @@ services:
     volumes:
       - ./:/usr/src/app
     command: wiji-cli --app benchmarks.wiji_app.myApp
-    environment:
-      aws_region_name: aws_region_name
-      aws_access_key_id: aws_access_key_id
-      aws_secret_access_key: aws_secret_access_key
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      IN_DOCKER: yep
-      USE_SQS: "NO"
+    env_file:
+      - compose.env
 
   metrics:
     build:
@@ -42,11 +30,5 @@ services:
     volumes:
       - ./:/usr/src/app
     command: python /usr/src/app/benchmarks/metrics.py
-    environment:
-      aws_region_name: aws_region_name
-      aws_access_key_id: aws_access_key_id
-      aws_secret_access_key: aws_secret_access_key
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      IN_DOCKER: yep
-      USE_SQS: "NO"
+    env_file:
+      - compose.env
