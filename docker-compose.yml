@@ -26,7 +26,7 @@ services:
       context: .
     volumes:
       - ./:/usr/src/app
-    command: wiji-cli --config benchmarks.wiji_app.myApp
+    command: wiji-cli --app benchmarks.wiji_app.myApp
     environment:
       aws_region_name: aws_region_name
       aws_access_key_id: aws_access_key_id

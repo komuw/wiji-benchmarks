@@ -31,16 +31,20 @@ else:
     BROKER = ExampleRedisBroker()
 
 
-class NetworkIOTask(wiji.task.Task):
+class BaseTask(wiji.task.Task):
+    the_broker = BROKER
+    the_hook = myHook
+    loglevel = "INFO"
+
+
+class NetworkIOTask(BaseTask):
     """
     class that simulates a network IO bound task.
     This task calls a url that has a latency that varies between 2 seconds and 7 seconds
     """
 
-    the_broker = BROKER
     queue_name = "NetworkIOTask"
     task_name = "task_name-{0}".format(queue_name)
-    the_hook = myHook
 
     async def run(self, *args, **kwargs):
         latency = random.randint(2, 7)  # latency in seconds
@@ -52,7 +56,7 @@ class NetworkIOTask(wiji.task.Task):
                 print(res_text[:50])
 
 
-class DiskIOTask(wiji.task.Task):
+class DiskIOTask(BaseTask):
     """
     class that simulates a disk IO bound task.
     This task:
@@ -64,10 +68,8 @@ class DiskIOTask(wiji.task.Task):
     this task will also tax your cpu.
     """
 
-    the_broker = BROKER
     queue_name = "DiskIOTask"
     task_name = "task_name-{0}".format(queue_name)
-    the_hook = myHook
 
     async def run(self, filename):
         content = "".join(random.choices(string.ascii_uppercase + string.digits, k=16384))  # 16KB
@@ -79,7 +81,7 @@ class DiskIOTask(wiji.task.Task):
         os.remove(filename)
 
 
-class CPUTask(wiji.task.Task):
+class CPUTask(BaseTask):
     """
     class that simulates a cpu  bound task.
     This task:
@@ -89,10 +91,8 @@ class CPUTask(wiji.task.Task):
       - then decrypts it.
     """
 
-    the_broker = BROKER
     queue_name = "CPUTask"
     task_name = "task_name-{0}".format(queue_name)
-    the_hook = myHook
 
     async def run(self, *args, **kwargs):
         content = "".join(random.choices(string.ascii_uppercase + string.digits, k=16384))  # 16KB
@@ -107,32 +107,28 @@ class CPUTask(wiji.task.Task):
         f.decrypt(token)
 
 
-class DividerTask(wiji.task.Task):
+class DividerTask(BaseTask):
     """
     task that divides its input by 3.
     This will be chained with the AdderTask.
     """
 
-    the_broker = BROKER
     queue_name = "DividerTask"
     task_name = "task_name-{0}".format(queue_name)
-    the_hook = myHook
 
     async def run(self, dividend):
         answer = dividend / 3
         return answer
 
 
-class AdderTask(wiji.task.Task):
+class AdderTask(BaseTask):
     """
     task that adds two numbers together.
     the result of this task is then passed over to the DividerTask as an argument
     """
 
-    the_broker = BROKER
     queue_name = "AdderTask"
     task_name = "task_name-{0}".format(queue_name)
-    the_hook = myHook
     chain = DividerTask
 
     async def run(self, a, b):
