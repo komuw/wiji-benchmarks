@@ -1,8 +1,10 @@
+import os
 import sys
 import typing
 import logging
 
 import wiji
+import psutil
 
 from benchmarks import metrics
 
@@ -10,9 +12,33 @@ from benchmarks import metrics
 myMet = metrics.Metrics()
 
 
+CURRENT_PROCESS = psutil.Process()
+
+
 class BenchmarksHook(wiji.hook.BaseHook):
     def __init__(self,) -> None:
         self.logger = wiji.logger.SimpleLogger("wiji.benchmarks.BenchmarksHook")
+
+    async def set_host_metrics(self):
+        """
+        calculates & set's various host metrics
+        """
+        mem = psutil.virtual_memory()
+        total_ram = mem.total / 1_000_000
+        used_ram = mem.used / 1_000_000
+        free_ram = mem.free / 1_000_000
+
+        cpu_percent = CURRENT_PROCESS.cpu_percent()
+        process_id = CURRENT_PROCESS.pid
+
+        val = {
+            "total_ram": total_ram,
+            "used_ram": used_ram,
+            "free_ram": free_ram,
+            "cpu_percent": cpu_percent,
+            "process_id": process_id,
+        }
+        await myMet.lpush("host_metrics", val)
 
     async def notify(
         self,
@@ -27,6 +53,9 @@ class BenchmarksHook(wiji.hook.BaseHook):
         execution_exception: typing.Union[None, Exception] = None,
         return_value: typing.Union[None, typing.Any] = None,
     ) -> None:
+
+        await self.set_host_metrics()
+
         try:
             if not isinstance(queuing_exception, type(None)):
                 raise ValueError(

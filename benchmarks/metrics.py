@@ -84,6 +84,29 @@ class Metrics:
     def _blocking_incr(self, counter_name: str) -> None:
         return self.redis_instance.incrby(counter_name)
 
+    async def lpush(self, name: str, val: dict) -> None:
+        with concurrent.futures.ThreadPoolExecutor(
+            thread_name_prefix=self.thread_name_prefix
+        ) as executor:
+            await self._get_loop().run_in_executor(
+                executor, functools.partial(self._blocking_lpush, name=name, val=val)
+            )
+
+    def _blocking_lpush(self, name: str, val: dict) -> None:
+        self.redis_instance.lpush(name, json.dumps(val))
+
+    async def lrange(self, name: str) -> list:
+        with concurrent.futures.ThreadPoolExecutor(
+            thread_name_prefix=self.thread_name_prefix
+        ) as executor:
+            items = await self._get_loop().run_in_executor(
+                executor, functools.partial(self._blocking_lrange, name=name)
+            )
+            return items
+
+    def _blocking_lrange(self, name: str) -> list:
+        return self.redis_instance.lrange(name, 0, -1)
+
 
 def main():
     async def main() -> None:
@@ -119,6 +142,8 @@ def main():
                 logger.log(
                     logging.INFO, {"event": "stream_metric", "val": val, "met_name": met_name}
                 )
+            host_metrics = await met.lrange(name="host_metrics")
+            logger.log(logging.INFO, {"event": "stream_metric", "host_metrics": host_metrics})
 
             await asyncio.sleep(10)
 

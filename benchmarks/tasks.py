@@ -5,6 +5,7 @@ import string
 import logging
 import hashlib
 
+import psutil
 import aiohttp
 from cryptography.fernet import Fernet
 
@@ -126,10 +127,8 @@ class MemTask(BaseTask):
         calculates various values of RAM(inclusive of SWAP).
         returns the size of free RAM in bytes
         """
-        # NB: this figures are inclusive of SWAP if any.
-        # this may not be cross-platform
-        total_ram, used_ram, free_ram = map(int, os.popen("free -t -b").readlines()[-1].split()[1:])
-        return free_ram
+        mem = psutil.virtual_memory()
+        return mem.free
 
     async def run(self, *args, **kwargs):
         free_ram = self.calculate_ram()
