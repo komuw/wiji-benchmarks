@@ -110,6 +110,7 @@ def main():
             tasks.NetworkIOTask.task_name,
             tasks.DiskIOTask.task_name,
             tasks.CPUTask.task_name,
+            tasks.MemTask.task_name,
             tasks.DividerTask.task_name,
             tasks.AdderTask.task_name,
         ]

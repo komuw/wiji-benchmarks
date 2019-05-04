@@ -1,4 +1,5 @@
 import os
+import sys
 import random
 import string
 import hashlib
@@ -19,9 +20,9 @@ myHook = myHook.BenchmarksHook()
 USE_SQS = os.environ.get("USE_SQS", "NO")
 if USE_SQS == "YES":
     BROKER = wijisqs.SqsBroker(
-        AWS_REGION_NAME=os.environ["AWS_REGION_NAME"],
-        AWS_ACCESS_KEY_ID=os.environ["AWS_ACCESS_KEY_ID"],
-        AWS_SECRET_ACCESS_KEY=os.environ["AWS_SECRET_ACCESS_KEY"],
+        aws_region_name=os.environ["AWS_REGION_NAME"],
+        aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
+        aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
         queue_tags={"name": "wiji.SqsBroker.benchmarks", "url": "https://github.com/komuw/wiji"},
         loglevel="DEBUG",
         long_poll=True,
@@ -105,6 +106,38 @@ class CPUTask(BaseTask):
         f = Fernet(fernet_key)
         token = f.encrypt(content.encode())
         f.decrypt(token)
+
+
+class MemTask(BaseTask):
+    """
+    class that simulates a RAM/memory bound task.
+    This task:
+      - calculates how much free RAM there is.
+      - then stores something in RAM that is equal to 10% of the free RAM
+    """
+
+    queue_name = "MemTask"
+    task_name = "task_name-{0}".format(queue_name)
+
+    @staticmethod
+    def calculate_ram():
+        """
+        calculates various values of RAM(inclusive of SWAP).
+        returns the size of free RAM in bytes
+        """
+        # NB: this figures are inclusive of SWAP if any.
+        # this may not be cross-platform
+        total_ram, used_ram, free_ram = map(int, os.popen("free -t -b").readlines()[-1].split()[1:])
+        return free_ram
+
+    async def run(self, *args, **kwargs):
+        free_ram = self.calculate_ram()
+        # store something in RAM that will use up a significant percentage of the available free RAM.
+        target_size = int(0.1 * free_ram)
+        stored_string = "a"
+        stored_string = stored_string * target_size
+        print("111. size of stored_string string: {0} bytes".format(sys.getsizeof(stored_string)))
+        del stored_string
 
 
 class DividerTask(BaseTask):

@@ -18,7 +18,7 @@ max_tasks: int = 10001
 
 async def produce_disk_io_task() -> None:
     """
-    queue 200K of disk IO bound tasks.
+    queue `max_tasks` of disk IO bound tasks.
     """
     key = tasks.DiskIOTask.task_name
     val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
@@ -42,7 +42,7 @@ async def produce_disk_io_task() -> None:
 
 async def produce_network_io_task() -> None:
     """
-    queue 200K of network IO bound tasks.
+    queue `max_tasks` of network IO bound tasks.
     """
     key = tasks.NetworkIOTask.task_name
     val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
@@ -58,7 +58,7 @@ async def produce_network_io_task() -> None:
 
 async def produce_cpu_bound_task() -> None:
     """
-    queue 200K of cpu bound tasks.
+    queue `max_tasks` of cpu bound tasks.
     """
     key = tasks.CPUTask.task_name
     val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
@@ -72,10 +72,26 @@ async def produce_cpu_bound_task() -> None:
     await myMet.set(key, val)
 
 
+async def produce_ram_bound_task() -> None:
+    """
+    queue `max_tasks` of RAM bound tasks.
+    """
+    key = tasks.MemTask.task_name
+    val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
+    for i in range(0, max_tasks):
+        start = time.monotonic()
+        await tasks.MemTask().delay()
+        end = time.monotonic()
+        val["queue_count"] += 1
+        val["time_to_queue_one_task"] = float("{0:.2f}".format(end - start))
+
+    await myMet.set(key, val)
+
+
 async def produce_adder_task() -> None:
     """
-    queue 200K of adder tasks.
-    Those will in turn generate 200K divider tasks
+    queue `max_tasks` of adder tasks.
+    Those will in turn generate `max_tasks` divider tasks
     """
     key = tasks.AdderTask.task_name
     val = {"task_name": key, "queue_count": 0, "time_to_queue_one_task": 0.00}
@@ -98,6 +114,7 @@ async def main() -> None:
         produce_disk_io_task(),
         produce_network_io_task(),
         produce_cpu_bound_task(),
+        produce_ram_bound_task(),
         produce_adder_task(),
     )
     await gather_tasks

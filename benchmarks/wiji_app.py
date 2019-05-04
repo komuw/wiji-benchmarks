@@ -11,6 +11,7 @@ myApp = wiji.app.App(
         tasks.NetworkIOTask,
         tasks.DiskIOTask,
         tasks.CPUTask,
+        tasks.MemTask,
         tasks.DividerTask,
         tasks.AdderTask,
     ]
