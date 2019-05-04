@@ -1,6 +1,7 @@
 import os
 import sys
 import typing
+import random
 import logging
 
 import wiji
@@ -23,22 +24,26 @@ class BenchmarksHook(wiji.hook.BaseHook):
         """
         calculates & set's various host metrics
         """
-        mem = psutil.virtual_memory()
-        total_ram = mem.total / 1_000_000
-        used_ram = mem.used / 1_000_000
-        free_ram = mem.free / 1_000_000
+        if random.randint(0, 10) < 2:
+            # record host metrics only once in a while
+            mem = psutil.virtual_memory()
+            total_ram = mem.total / 1_000_000
+            used_ram = mem.used / 1_000_000
+            free_ram = mem.free / 1_000_000
 
-        cpu_percent = CURRENT_PROCESS.cpu_percent()
-        process_id = CURRENT_PROCESS.pid
+            cpu_percent = CURRENT_PROCESS.cpu_percent() / psutil.cpu_count()
+            process_id = CURRENT_PROCESS.pid
 
-        val = {
-            "total_ram": total_ram,
-            "used_ram": used_ram,
-            "free_ram": free_ram,
-            "cpu_percent": cpu_percent,
-            "process_id": process_id,
-        }
-        await myMet.lpush("host_metrics", val)
+            val = {
+                "total_ram": total_ram,
+                "used_ram": used_ram,
+                "free_ram": free_ram,
+                "cpu_percent": cpu_percent,
+                "process_id": process_id,
+            }
+            await myMet.lpush("host_metrics", val)
+        else:
+            return
 
     async def notify(
         self,
@@ -53,9 +58,6 @@ class BenchmarksHook(wiji.hook.BaseHook):
         execution_exception: typing.Union[None, Exception] = None,
         return_value: typing.Union[None, typing.Any] = None,
     ) -> None:
-
-        await self.set_host_metrics()
-
         try:
             if not isinstance(queuing_exception, type(None)):
                 raise ValueError(
@@ -122,6 +124,7 @@ class BenchmarksHook(wiji.hook.BaseHook):
             )
 
         elif state == wiji.task.TaskState.EXECUTED:
+            await self.set_host_metrics()
             execution_duration = float("{0:.2f}".format(execution_duration["monotonic"]))
             tasks_dequeued = await myMet.incr(
                 counter_name="tasks_dequeued_counter_{0}".format(task_name)
