@@ -145,7 +145,7 @@ def main():
             host_metrics = await met.lrange(name="host_metrics")
             logger.log(logging.INFO, {"event": "stream_metric", "host_metrics": host_metrics})
 
-            await asyncio.sleep(10)
+            await asyncio.sleep(20 * 60)  # 20mins
 
     asyncio.run(main(), debug=True)
 
