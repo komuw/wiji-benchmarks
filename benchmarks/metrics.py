@@ -142,11 +142,17 @@ def main():
                 val = await met.get(key=met_name)
                 all_mets.append(val)
             logger.log(logging.INFO, {"event": "stream_metric", "all_mets": all_mets})
+            f = open("/tmp/all_mets.json", mode="w")  # overrite file
+            f.write(json.dumps(all_mets))
+            f.close()
 
             host_metrics = await met.lrange(name="host_metrics")
             logger.log(logging.INFO, {"event": "stream_metric", "host_metrics": host_metrics})
+            f = open("/tmp/host_metrics.json", mode="w")
+            f.write(str(host_metrics))
+            f.close()
 
-            await asyncio.sleep(20 * 60)  # 20mins
+            await asyncio.sleep(10 * 60)  # 10mins
 
     asyncio.run(main(), debug=True)
 
