@@ -48,3 +48,6 @@ coverage.xml
 
 # sphinx
 sphinx-build
+
+# metrics folder
+/tmp
