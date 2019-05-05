@@ -137,11 +137,12 @@ def main():
 
         while True:
             # NB: the metrics may not have queueing metrics(eg queue_count) until all tasks have been queued
+            all_mets = []
             for met_name in metric_names:
                 val = await met.get(key=met_name)
-                logger.log(
-                    logging.INFO, {"event": "stream_metric", "val": val, "met_name": met_name}
-                )
+                all_mets.append(val)
+            logger.log(logging.INFO, {"event": "stream_metric", "all_mets": all_mets})
+
             host_metrics = await met.lrange(name="host_metrics")
             logger.log(logging.INFO, {"event": "stream_metric", "host_metrics": host_metrics})
 
