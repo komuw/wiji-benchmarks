@@ -1,0 +1,32 @@
+version: 2
+jobs:
+
+  static-analysis:
+    docker:
+      - image: circleci/python:3.7
+    environment:
+      PYTHONASYNCIODEBUG: 1 
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: install pre-requistes
+          command: |
+            pwd
+            sudo apt -y install pandoc
+            sudo pip install -r requirements.txt
+            find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
+      - run:
+          name: static-analysis
+          command: |
+            python --version
+            black --line-length=100 --check . ||  { printf "\\n\\t please use black to format your code."; exit 77; }
+            flake8 .
+            pylint --enable=E --disable=W,R,C benchmarks/
+            bandit -r --exclude .venv -ll .
+
+workflows:
+  version: 2
+  flow1:
+    jobs:
+      - static-analysis
