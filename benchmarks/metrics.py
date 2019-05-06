@@ -161,6 +161,7 @@ async def combine_queuing_metrics(delay_duration):
     """
 
     def generate_queuing_met_markdown(task_queuing_metrics):
+        # kept this way to preserve markdown formatting
         result_head = """Queuing metrics results:
 | Task name      |  Numober of tasks queued | Time to queue 1 task(sec) | Number of tasks dequeued | Time to execute 1 task(sec) |
 | :---           |  ---:                    |  ---:                     |   ---:                   |  ---:                       |
@@ -308,7 +309,7 @@ def main():
         )
         await gather_tasks
 
-    asyncio.run(async_main(delay_duration=5*60), debug=True)  # mins
+    asyncio.run(async_main(delay_duration=5 * 60), debug=True)  # mins
 
 
 if __name__ == "__main__":
