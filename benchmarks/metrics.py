@@ -259,7 +259,7 @@ async def combine_host_metrics(delay_duration):
         plt.legend()  # legend(loc="upper right")
         plt.title("Memory usage. Total Memory={0} MB".format(int(TOTAL_RAM)))
 
-        max_lim = TOTAL_RAM / 5
+        max_lim = TOTAL_RAM / 6
         if TOTAL_RAM < 2040:
             # less than 2GB
             max_lim = TOTAL_RAM
