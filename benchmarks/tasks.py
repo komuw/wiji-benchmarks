@@ -45,7 +45,7 @@ class DiskIOTask(BaseTask):
     class that simulates a disk IO bound task.
     This task:
       - creates a random file
-      - generates a random 16KB text
+      - generates a random 16KB text(about the size of `The Raven` by `Edgar Allan Poe`)
       - opens the file, writes that 16KB text to it & closes that file
       - finally it deletes the file
 
