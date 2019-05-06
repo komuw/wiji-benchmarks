@@ -33,7 +33,7 @@ services:
       context: .
     volumes:
       - ./:/usr/src/app
-      - ./tmp/metrics:/tmp
+      - ./tmp/metrics:/tmp/metrics
     command: python /usr/src/app/benchmarks/metrics.py
     env_file:
       - compose.env

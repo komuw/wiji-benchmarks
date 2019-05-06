@@ -1,13 +1,14 @@
 import os
 import json
 import typing
+import logging
 import asyncio
 import functools
 import concurrent
-import logging
 
 import redis
 import wiji
+import matplotlib.pyplot as plt
 
 from benchmarks import tasks
 
@@ -138,15 +139,17 @@ async def stream_metrics(delay_duration):
             val = await met.get(key=met_name)
             queuing_metrics.append(val)
         logger.log(logging.INFO, {"event": "stream_metric", "queuing_metrics": queuing_metrics})
-        f = open("/tmp/queuing_metrics.json", mode="w")  # overrite file
-        f.write(json.dumps(queuing_metrics))
-        f.close()
+        with open("/tmp/metrics/queuing_metrics.json", mode="w") as f:  # overrite file
+            f.write(json.dumps(queuing_metrics))
 
         host_metrics = await met.lrange(name="host_metrics")
         logger.log(logging.INFO, {"event": "stream_metric", "host_metrics": host_metrics})
-        f = open("/tmp/host_metrics.json", mode="w")
-        f.write(str(host_metrics))
-        f.close()
+
+        new_host_metrics = []
+        for i in host_metrics:
+            new_host_metrics.append(i.decode())
+        with open("/tmp/metrics/host_metrics.json", mode="w") as f:
+            f.write(json.dumps(new_host_metrics))
 
         await asyncio.sleep(delay_duration)
 
@@ -154,6 +157,7 @@ async def stream_metrics(delay_duration):
 async def combine_queuing_metrics(delay_duration):
     """
     """
+    queuing_metrics = None
     task_queuing_metrics = {
         # "MyExampleTask1": {
         #     "tasks_queued": 45,
@@ -164,32 +168,83 @@ async def combine_queuing_metrics(delay_duration):
     }
     while True:
         await asyncio.sleep(delay_duration + (delay_duration / 6))
-        with open("./tmp/metrics/queuing_metrics.json", mode="r") as f:
+        with open("/tmp/metrics/queuing_metrics.json", mode="r") as f:
             met = f.read()
             queuing_metrics = json.loads(met)
-            for task_met in queuing_metrics:
-                if not task_queuing_metrics.get(task_met["task_name"]):
-                    task_queuing_metrics[task_met["task_name"]] = {}
 
-                if task_met.get("tasks_queued"):
-                    task_queuing_metrics[task_met["task_name"]].update(
-                        {"tasks_queued": task_met.get("tasks_queued")}
-                    )
-                if task_met.get("queuing_duration"):
-                    task_queuing_metrics[task_met["task_name"]].update(
-                        {"queuing_duration": task_met.get("queuing_duration")}
-                    )
-                if task_met.get("tasks_dequeued"):
-                    task_queuing_metrics[task_met["task_name"]].update(
-                        {"tasks_dequeued": task_met.get("tasks_dequeued")}
-                    )
-                if task_met.get("execution_duration"):
-                    task_queuing_metrics[task_met["task_name"]].update(
-                        {"execution_duration": task_met.get("execution_duration")}
-                    )
+        for task_met in queuing_metrics:
+            if not task_queuing_metrics.get(task_met["task_name"]):
+                task_queuing_metrics[task_met["task_name"]] = {}
 
-        with open("./tmp/metrics/final_queuing_metrics.json", mode="w") as f:
+            if task_met.get("tasks_queued"):
+                task_queuing_metrics[task_met["task_name"]].update(
+                    {"tasks_queued": task_met.get("tasks_queued")}
+                )
+            if task_met.get("queuing_duration"):
+                task_queuing_metrics[task_met["task_name"]].update(
+                    {"queuing_duration": task_met.get("queuing_duration")}
+                )
+            if task_met.get("tasks_dequeued"):
+                task_queuing_metrics[task_met["task_name"]].update(
+                    {"tasks_dequeued": task_met.get("tasks_dequeued")}
+                )
+            if task_met.get("execution_duration"):
+                task_queuing_metrics[task_met["task_name"]].update(
+                    {"execution_duration": task_met.get("execution_duration")}
+                )
+
+        with open("/tmp/metrics/final_queuing_metrics.json", mode="w") as f:
             f.write(json.dumps(task_queuing_metrics, indent=2))
+
+
+async def combine_host_metrics(delay_duration):
+    new_host_metrics = []
+    while True:
+        await asyncio.sleep(delay_duration + (delay_duration / 6))
+        with open("/tmp/metrics/host_metrics.json", mode="r") as f:
+            met = f.read()
+            host_metrics = json.loads(met)
+            for i in host_metrics:
+                new_host_metrics.append(json.loads(i))
+
+        ################## MEM stats ######################
+        TOTAL_RAM = new_host_metrics[0]["total_ram"]
+        rss_mem_over_time = []
+        for i in new_host_metrics:
+            rss_mem_over_time.append(i["rss_mem"])
+
+        plt.style.use("seaborn-whitegrid")
+        fig = plt.figure()
+        ax = plt.axes()
+        plt.ylabel("RAM/memory (MB)")
+        plt.xlabel("time")
+
+        # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html
+        ax.plot(rss_mem_over_time, color="green", label="rss memory")
+
+        # ax.plot(total_ram_array, color="blue", label="total memory")  # total_ram
+        ax.legend()  # legend(loc="upper right")
+        plt.title("Memory usage. Total Memory={0} MB".format(int(TOTAL_RAM)))
+        plt.ylim(0, TOTAL_RAM / 8)
+
+        plt.savefig("/tmp/metrics/rss_mem_over_time.png")
+        ################## MEM stats ######################
+
+        ################## CPU stats ######################
+        cpu_percent_over_time = []
+        for i in new_host_metrics:
+            cpu_percent_over_time.append(i["cpu_percent"])
+
+        fig = plt.figure()
+        ax = plt.axes()
+        plt.ylabel("CPU usage (%)")
+        plt.xlabel("time")
+        ax.plot(cpu_percent_over_time, color="green", label="cpu_percent")
+        ax.legend()
+        plt.title("CPU usage.")
+        plt.ylim(0, 100)
+        plt.savefig("/tmp/metrics/cpu_percent_over_time.png")
+        ################## CPU stats ######################
 
 
 def main():
@@ -202,10 +257,11 @@ def main():
         gather_tasks = asyncio.gather(
             stream_metrics(delay_duration=delay_duration),
             combine_queuing_metrics(delay_duration=delay_duration),
+            combine_host_metrics(delay_duration=delay_duration),
         )
         await gather_tasks
 
-    asyncio.run(async_main(delay_duration=10 * 60), debug=True)  # 10mins
+    asyncio.run(async_main(delay_duration=10*60), debug=True)  # 10mins
 
 
 if __name__ == "__main__":
