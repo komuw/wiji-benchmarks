@@ -198,53 +198,66 @@ async def combine_queuing_metrics(delay_duration):
 
 
 async def combine_host_metrics(delay_duration):
-    new_host_metrics = []
-    while True:
-        await asyncio.sleep(delay_duration + (delay_duration / 6))
+    def get_host_met():
+        new_host_metrics = []
         with open("/tmp/metrics/host_metrics.json", mode="r") as f:
             met = f.read()
             host_metrics = json.loads(met)
             for i in host_metrics:
                 new_host_metrics.append(json.loads(i))
+        return new_host_metrics
 
-        ################## MEM stats ######################
+    def get_mem_metrics(new_host_metrics):
         TOTAL_RAM = new_host_metrics[0]["total_ram"]
         rss_mem_over_time = []
         for i in new_host_metrics:
             rss_mem_over_time.append(i["rss_mem"])
 
         plt.style.use("seaborn-whitegrid")
-        fig = plt.figure()
-        ax = plt.axes()
         plt.ylabel("RAM/memory (MB)")
         plt.xlabel("time")
+        plt.figure("mem")
 
         # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html
-        ax.plot(rss_mem_over_time, color="green", label="rss memory")
+        plt.plot(rss_mem_over_time, color="green", label="rss memory")
 
-        # ax.plot(total_ram_array, color="blue", label="total memory")  # total_ram
-        ax.legend()  # legend(loc="upper right")
+        # plt.plot(total_ram_array, color="blue", label="total memory")  # total_ram
+        plt.legend()  # legend(loc="upper right")
         plt.title("Memory usage. Total Memory={0} MB".format(int(TOTAL_RAM)))
         plt.ylim(0, TOTAL_RAM / 8)
 
-        plt.savefig("/tmp/metrics/rss_mem_over_time.png")
-        ################## MEM stats ######################
+        mem_graph = "/tmp/metrics/rss_mem_over_time.png"
+        if os.path.exists(mem_graph):
+            # so that it can be overritten
+            os.remove(mem_graph)
+        plt.savefig(mem_graph)
 
-        ################## CPU stats ######################
+    def get_cpu_metrics(new_host_metrics):
         cpu_percent_over_time = []
         for i in new_host_metrics:
             cpu_percent_over_time.append(i["cpu_percent"])
 
-        fig = plt.figure()
-        ax = plt.axes()
+        plt.style.use("seaborn-whitegrid")
         plt.ylabel("CPU usage (%)")
         plt.xlabel("time")
-        ax.plot(cpu_percent_over_time, color="green", label="cpu_percent")
-        ax.legend()
+        plt.figure("cpu")  # creates new named instance instead of re-using
+
+        plt.plot(cpu_percent_over_time, color="green", label="cpu_percent")
+        plt.legend()
         plt.title("CPU usage.")
         plt.ylim(0, 100)
-        plt.savefig("/tmp/metrics/cpu_percent_over_time.png")
-        ################## CPU stats ######################
+
+        cpu_graph = "/tmp/metrics/cpu_percent_over_time.png"
+        if os.path.exists(cpu_graph):
+            # so that it can be overritten
+            os.remove(cpu_graph)
+        plt.savefig(cpu_graph)
+
+    while True:
+        await asyncio.sleep(delay_duration + (delay_duration / 6))
+        new_host_metrics = get_host_met()
+        get_mem_metrics(new_host_metrics)
+        get_cpu_metrics(new_host_metrics)
 
 
 def main():
@@ -261,7 +274,7 @@ def main():
         )
         await gather_tasks
 
-    asyncio.run(async_main(delay_duration=10*60), debug=True)  # 10mins
+    asyncio.run(async_main(delay_duration=10 * 60), debug=True)  # 10mins
 
 
 if __name__ == "__main__":
