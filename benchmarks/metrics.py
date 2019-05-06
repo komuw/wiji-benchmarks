@@ -157,13 +157,13 @@ async def stream_metrics(delay_duration):
 
 async def combine_queuing_metrics(delay_duration):
     """
+    create markdown file with table with queueing metrics.
     """
 
-    #######
     def generate_queuing_met_markdown(task_queuing_metrics):
-        result_head = """Queuing metrics results:     
+        result_head = """Queuing metrics results:
             | Task name      |  Numober of tasks queued | Time to queue 1 task(sec) | Number of tasks dequeued | Time to execute 1 task(sec) |
-            | :---           |  ---:                    |  ---:                     |   ---:                   |  ---:                       |    
+            | :---           |  ---:                    |  ---:                     |   ---:                   |  ---:                       |
             """
 
         result_body = """| {task_name}    |  {tasks_queued}          |  {queuing_duration}       |  {tasks_dequeued}        |  {execution_duration}       |
@@ -183,8 +183,6 @@ async def combine_queuing_metrics(delay_duration):
         final_markdwon = result_head + "".join(all_res)
         with open("./tmp/metrics/queuing_metrics.md", mode="w") as f:
             f.write(final_markdwon)
-
-    ##########
 
     queuing_metrics = None
     task_queuing_metrics = {
@@ -222,8 +220,9 @@ async def combine_queuing_metrics(delay_duration):
                     {"execution_duration": task_met.get("execution_duration")}
                 )
 
-        with open("/tmp/metrics/final_queuing_metrics.json", mode="w") as f:
-            f.write(json.dumps(task_queuing_metrics, indent=2))
+        # with open("/tmp/metrics/final_queuing_metrics.json", mode="w") as f:
+        #     f.write(json.dumps(task_queuing_metrics, indent=2))
+        generate_queuing_met_markdown(task_queuing_metrics=task_queuing_metrics)
 
 
 async def combine_host_metrics(delay_duration):
