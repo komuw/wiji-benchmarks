@@ -226,7 +226,7 @@ async def combine_host_metrics(delay_duration):
         plt.plot(rss_mem_over_time, color="green", label="rss memory")
         # plt.plot(total_ram_array, color="blue", label="total memory")  # 2graphs in one
         plt.style.use("seaborn-whitegrid")
-        plt.ylabel("RAM/memory (MB)")
+        plt.ylabel("Memory usage (MB)")
         plt.xlabel("time")
         plt.legend()  # legend(loc="upper right")
         plt.title("Memory usage. Total Memory={0} MB".format(int(TOTAL_RAM)))
