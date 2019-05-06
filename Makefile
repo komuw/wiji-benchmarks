@@ -4,4 +4,4 @@ analysis:
 	@printf "run pylint\n"
 	@pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y benchmarks/
 	@printf "run bandit\n"
-	@bandit -r --exclude .venv -ll .
+	@bandit -r --exclude .venv -lll .

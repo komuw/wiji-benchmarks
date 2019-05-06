@@ -23,7 +23,7 @@ jobs:
             black --line-length=100 --check . ||  { printf "\\n\\t please use black to format your code."; exit 77; }
             flake8 .
             pylint --enable=E --disable=W,R,C benchmarks/
-            bandit -r --exclude .venv -ll .
+            bandit -r --exclude .venv -lll .
 
 workflows:
   version: 2
