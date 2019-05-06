@@ -1,5 +1,6 @@
 import os
 import json
+import uuid
 import typing
 import logging
 import asyncio
@@ -216,7 +217,7 @@ async def combine_host_metrics(delay_duration):
         plt.style.use("seaborn-whitegrid")
         plt.ylabel("RAM/memory (MB)")
         plt.xlabel("time")
-        plt.figure("mem")
+        plt.figure("mem-{0}".format(str(uuid.uuid4())))
 
         # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html
         plt.plot(rss_mem_over_time, color="green", label="rss memory")
@@ -240,7 +241,9 @@ async def combine_host_metrics(delay_duration):
         plt.style.use("seaborn-whitegrid")
         plt.ylabel("CPU usage (%)")
         plt.xlabel("time")
-        plt.figure("cpu")  # creates new named instance instead of re-using
+        plt.figure(
+            "cpu-{0}".format(str(uuid.uuid4()))
+        )  # creates new named instance instead of re-using
 
         plt.plot(cpu_percent_over_time, color="green", label="cpu_percent")
         plt.legend()
