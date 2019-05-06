@@ -158,6 +158,34 @@ async def stream_metrics(delay_duration):
 async def combine_queuing_metrics(delay_duration):
     """
     """
+
+    #######
+    def generate_queuing_met_markdown(task_queuing_metrics):
+        result_head = """Queuing metrics results:     
+            | Task name      |  Numober of tasks queued | Time to queue 1 task(sec) | Number of tasks dequeued | Time to execute 1 task(sec) |
+            | :---           |  ---:                    |  ---:                     |   ---:                   |  ---:                       |    
+            """
+
+        result_body = """| {task_name}    |  {tasks_queued}          |  {queuing_duration}       |  {tasks_dequeued}        |  {execution_duration}       |
+        """
+
+        all_res = []
+        for i in task_queuing_metrics.keys():
+            _result = result_body.format(
+                task_name=i,
+                tasks_queued=task_queuing_metrics[i].get("tasks_queued"),
+                queuing_duration=task_queuing_metrics[i].get("queuing_duration"),
+                tasks_dequeued=task_queuing_metrics[i].get("tasks_dequeued"),
+                execution_duration=task_queuing_metrics[i].get("execution_duration"),
+            )
+            all_res.append(_result)
+
+        final_markdwon = result_head + "".join(all_res)
+        with open("./tmp/metrics/queuing_metrics.md", mode="w") as f:
+            f.write(final_markdwon)
+
+    ##########
+
     queuing_metrics = None
     task_queuing_metrics = {
         # "MyExampleTask1": {
