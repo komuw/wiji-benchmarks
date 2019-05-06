@@ -1,4 +1,5 @@
-## wiji-benchmarks         
+## wiji-benchmarks     
+[![CircleCI](https://circleci.com/gh/komuw/wiji-benchmarks.svg?style=svg)](https://circleci.com/gh/komuw/wiji-benchmarks)
 
 This benchmark, show how `wiji` performs when executing different types of tasks/workloads.   
 
