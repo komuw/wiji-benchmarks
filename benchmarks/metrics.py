@@ -258,7 +258,12 @@ async def combine_host_metrics(delay_duration):
         plt.xlabel("time")
         plt.legend()  # legend(loc="upper right")
         plt.title("Memory usage. Total Memory={0} MB".format(int(TOTAL_RAM)))
-        plt.ylim(0, TOTAL_RAM / 8)
+
+        max_lim = TOTAL_RAM / 5
+        if TOTAL_RAM < 2040:
+            # less than 2GB
+            max_lim = TOTAL_RAM
+        plt.ylim(0, max_lim)
 
         mem_graph = "/tmp/metrics/rss_mem_over_time.png"
         if os.path.exists(mem_graph):
