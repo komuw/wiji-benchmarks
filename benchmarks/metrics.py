@@ -221,8 +221,8 @@ async def combine_host_metrics(delay_duration):
 
         # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html
         plt.plot(rss_mem_over_time, color="green", label="rss memory")
-
         # plt.plot(total_ram_array, color="blue", label="total memory")  # total_ram
+
         plt.legend()  # legend(loc="upper right")
         plt.title("Memory usage. Total Memory={0} MB".format(int(TOTAL_RAM)))
         plt.ylim(0, TOTAL_RAM / 8)
