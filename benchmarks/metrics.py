@@ -308,7 +308,7 @@ def main():
         )
         await gather_tasks
 
-    asyncio.run(async_main(delay_duration=7 * 60), debug=True)  # mins
+    asyncio.run(async_main(delay_duration=5 * 60), debug=True)  # mins
 
 
 if __name__ == "__main__":
