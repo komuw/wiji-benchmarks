@@ -34,5 +34,5 @@ for i in final_queuing_metrics.keys():
 
 
 final_markdwon = result_head + "".join(all_res)
-with open("./tmp/metrics/ala.md", mode="w") as f:
+with open("./tmp/metrics/queuing_metrics.md", mode="w") as f:
     f.write(final_markdwon)
