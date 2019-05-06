@@ -209,20 +209,25 @@ async def combine_host_metrics(delay_duration):
         return new_host_metrics
 
     def get_mem_metrics(new_host_metrics):
+        """
+        To plot/graph:
+          1. create figure
+          2. plt.plot
+          3. style, add x-y labels
+          4. plt.legend, plt.title, plt.ylim
+          5. plt.savefig
+        """
         TOTAL_RAM = new_host_metrics[0]["total_ram"]
         rss_mem_over_time = []
         for i in new_host_metrics:
             rss_mem_over_time.append(i["rss_mem"])
 
+        plt.figure("mem-{0}".format(str(uuid.uuid4())))
+        plt.plot(rss_mem_over_time, color="green", label="rss memory")
+        # plt.plot(total_ram_array, color="blue", label="total memory")  # 2graphs in one
         plt.style.use("seaborn-whitegrid")
         plt.ylabel("RAM/memory (MB)")
         plt.xlabel("time")
-        plt.figure("mem-{0}".format(str(uuid.uuid4())))
-
-        # https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html
-        plt.plot(rss_mem_over_time, color="green", label="rss memory")
-        # plt.plot(total_ram_array, color="blue", label="total memory")  # total_ram
-
         plt.legend()  # legend(loc="upper right")
         plt.title("Memory usage. Total Memory={0} MB".format(int(TOTAL_RAM)))
         plt.ylim(0, TOTAL_RAM / 8)
@@ -238,14 +243,13 @@ async def combine_host_metrics(delay_duration):
         for i in new_host_metrics:
             cpu_percent_over_time.append(i["cpu_percent"])
 
-        plt.style.use("seaborn-whitegrid")
-        plt.ylabel("CPU usage (%)")
-        plt.xlabel("time")
         plt.figure(
             "cpu-{0}".format(str(uuid.uuid4()))
         )  # creates new named instance instead of re-using
-
         plt.plot(cpu_percent_over_time, color="green", label="cpu_percent")
+        plt.style.use("seaborn-whitegrid")
+        plt.ylabel("CPU usage (%)")
+        plt.xlabel("time")
         plt.legend()
         plt.title("CPU usage.")
         plt.ylim(0, 100)
