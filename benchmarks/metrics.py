@@ -108,53 +108,104 @@ class Metrics:
         return self.redis_instance.lrange(name, 0, -1)
 
 
+async def stream_metrics(delay_duration):
+    """
+    stream metrics as they come in.
+    """
+    logger = wiji.logger.SimpleLogger("metrics_streaming")
+    logger.bind(level="INFO", log_metadata={})
+
+    met = Metrics()
+
+    task_names = [
+        tasks.NetworkIOTask.task_name,
+        tasks.DiskIOTask.task_name,
+        tasks.CPUTask.task_name,
+        tasks.MemTask.task_name,
+        tasks.DividerTask.task_name,
+        tasks.AdderTask.task_name,
+    ]
+
+    metric_names = []
+    for t_name in task_names:
+        metric_names.append(t_name + "_queuing_duration")
+        metric_names.append(t_name + "_execution_duration")
+
+    while True:
+        # NB: the metrics may not have queueing metrics(eg queue_count) until all tasks have been queued
+        queuing_metrics = []
+        for met_name in metric_names:
+            val = await met.get(key=met_name)
+            queuing_metrics.append(val)
+        logger.log(logging.INFO, {"event": "stream_metric", "queuing_metrics": queuing_metrics})
+        f = open("/tmp/queuing_metrics.json", mode="w")  # overrite file
+        f.write(json.dumps(queuing_metrics))
+        f.close()
+
+        host_metrics = await met.lrange(name="host_metrics")
+        logger.log(logging.INFO, {"event": "stream_metric", "host_metrics": host_metrics})
+        f = open("/tmp/host_metrics.json", mode="w")
+        f.write(str(host_metrics))
+        f.close()
+
+        await asyncio.sleep(delay_duration)
+
+
+async def combine_queuing_metrics(delay_duration):
+    """
+    """
+    task_queuing_metrics = {
+        # "MyExampleTask1": {
+        #     "tasks_queued": 45,
+        #     "queuing_duration": 0.98,
+        #     "tasks_dequeued": 3,
+        #     "execution_duration": 0.56,
+        # }
+    }
+    while True:
+        await asyncio.sleep(delay_duration + (delay_duration / 6))
+        with open("./tmp/metrics/queuing_metrics.json", mode="r") as f:
+            met = f.read()
+            queuing_metrics = json.loads(met)
+            for task_met in queuing_metrics:
+                if not task_queuing_metrics.get(task_met["task_name"]):
+                    task_queuing_metrics[task_met["task_name"]] = {}
+
+                if task_met.get("tasks_queued"):
+                    task_queuing_metrics[task_met["task_name"]].update(
+                        {"tasks_queued": task_met.get("tasks_queued")}
+                    )
+                if task_met.get("queuing_duration"):
+                    task_queuing_metrics[task_met["task_name"]].update(
+                        {"queuing_duration": task_met.get("queuing_duration")}
+                    )
+                if task_met.get("tasks_dequeued"):
+                    task_queuing_metrics[task_met["task_name"]].update(
+                        {"tasks_dequeued": task_met.get("tasks_dequeued")}
+                    )
+                if task_met.get("execution_duration"):
+                    task_queuing_metrics[task_met["task_name"]].update(
+                        {"execution_duration": task_met.get("execution_duration")}
+                    )
+
+        with open("./tmp/metrics/final_queuing_metrics.json", mode="w") as f:
+            f.write(json.dumps(task_queuing_metrics, indent=2))
+
+
 def main():
-    async def main() -> None:
-        """
-        stream metrics as they come in.
+    """
+    usage:
+        python benchmarks/metrics.py
+    """
 
-        usage:
-            python benchmarks/metrics.py
-        """
-        logger = wiji.logger.SimpleLogger("metrics_streaming")
-        logger.bind(level="INFO", log_metadata={})
+    async def async_main(delay_duration) -> None:
+        gather_tasks = asyncio.gather(
+            stream_metrics(delay_duration=delay_duration),
+            combine_queuing_metrics(delay_duration=delay_duration),
+        )
+        await gather_tasks
 
-        met = Metrics()
-
-        task_names = [
-            tasks.NetworkIOTask.task_name,
-            tasks.DiskIOTask.task_name,
-            tasks.CPUTask.task_name,
-            tasks.MemTask.task_name,
-            tasks.DividerTask.task_name,
-            tasks.AdderTask.task_name,
-        ]
-
-        metric_names = []
-        for t_name in task_names:
-            metric_names.append(t_name + "_queuing_duration")
-            metric_names.append(t_name + "_execution_duration")
-
-        while True:
-            # NB: the metrics may not have queueing metrics(eg queue_count) until all tasks have been queued
-            all_mets = []
-            for met_name in metric_names:
-                val = await met.get(key=met_name)
-                all_mets.append(val)
-            logger.log(logging.INFO, {"event": "stream_metric", "all_mets": all_mets})
-            f = open("/tmp/all_mets.json", mode="w")  # overrite file
-            f.write(json.dumps(all_mets))
-            f.close()
-
-            host_metrics = await met.lrange(name="host_metrics")
-            logger.log(logging.INFO, {"event": "stream_metric", "host_metrics": host_metrics})
-            f = open("/tmp/host_metrics.json", mode="w")
-            f.write(str(host_metrics))
-            f.close()
-
-            await asyncio.sleep(10 * 60)  # 10mins
-
-    asyncio.run(main(), debug=True)
+    asyncio.run(async_main(delay_duration=10 * 60), debug=True)  # 10mins
 
 
 if __name__ == "__main__":
