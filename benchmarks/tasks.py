@@ -13,7 +13,7 @@ import wiji
 import wijisqs
 
 from benchmarks import myHook
-from benchmarks.redis_broker import ExampleRedisBroker
+from benchmarks import redis_broker
 
 
 myHook = myHook.BenchmarksHook()
@@ -31,7 +31,7 @@ if USE_SQS == "YES":
         batch_send=True,
     )
 else:
-    BROKER = ExampleRedisBroker()
+    BROKER = redis_broker.ExampleRedisBroker()
 
 
 class BaseTask(wiji.task.Task):

@@ -75,4 +75,5 @@ async def main() -> None:
     await gather_tasks
 
 
-asyncio.run(main(), debug=True)
+if __name__ == "__main__":
+    asyncio.run(main(), debug=True)

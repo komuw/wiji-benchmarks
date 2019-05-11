@@ -1,6 +1,5 @@
 import wiji
 
-
 from benchmarks import tasks
 
 # Usage:
