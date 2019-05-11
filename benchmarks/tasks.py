@@ -66,14 +66,14 @@ class DiskIOTask(BaseTask):
 class NetworkIOTask(BaseTask):
     """
     class that simulates a network IO bound task.
-    This task calls a url with a latency that varies between 200 milliseconds and 700 milliseconds
+    This task calls a url with a latency that varies between 200 milliseconds and 600 milliseconds
     """
 
     queue_name = "NetworkIOTask"
     task_name = "task_name-{0}".format(queue_name)
 
     async def run(self, *args, **kwargs):
-        latency = random.randint(2, 7) / 10  # latency in seconds
+        latency = random.randint(2, 6) / 10  # latency in seconds
         url = "https://httpbin.org/delay/{latency}".format(latency=latency)
 
         async with aiohttp.ClientSession() as session:
