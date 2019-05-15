@@ -3,7 +3,6 @@ import asyncio
 import functools
 import concurrent
 
-
 import wiji
 import redis
 

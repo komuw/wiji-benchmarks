@@ -163,7 +163,7 @@ async def combine_queuing_metrics(delay_duration):
     def generate_queuing_met_markdown(task_queuing_metrics):
         # kept this way to preserve markdown formatting
         result_head = """Queuing metrics results:
-| Task name      |  Numober of tasks queued | Time to queue 1 task(sec) | Number of tasks dequeued | Time to execute 1 task(sec) |
+| Task name      |  Number of tasks queued  | Time to queue 1 task(sec) | Number of tasks dequeued | Time to execute 1 task(sec) |
 | :---           |  ---:                    |  ---:                     |   ---:                   |  ---:                       |
 """
 
@@ -201,22 +201,22 @@ async def combine_queuing_metrics(delay_duration):
             queuing_metrics = json.loads(met)
 
         for task_met in queuing_metrics:
-            if not task_queuing_metrics.get(task_met["task_name"]):
+            if task_queuing_metrics.get(task_met["task_name"]) is None:
                 task_queuing_metrics[task_met["task_name"]] = {}
 
-            if task_met.get("tasks_queued"):
+            if task_met.get("tasks_queued") is not None:
                 task_queuing_metrics[task_met["task_name"]].update(
                     {"tasks_queued": task_met.get("tasks_queued")}
                 )
-            if task_met.get("queuing_duration"):
+            if task_met.get("queuing_duration") is not None:
                 task_queuing_metrics[task_met["task_name"]].update(
                     {"queuing_duration": task_met.get("queuing_duration")}
                 )
-            if task_met.get("tasks_dequeued"):
+            if task_met.get("tasks_dequeued") is not None:
                 task_queuing_metrics[task_met["task_name"]].update(
                     {"tasks_dequeued": task_met.get("tasks_dequeued")}
                 )
-            if task_met.get("execution_duration"):
+            if task_met.get("execution_duration") is not None:
                 task_queuing_metrics[task_met["task_name"]].update(
                     {"execution_duration": task_met.get("execution_duration")}
                 )

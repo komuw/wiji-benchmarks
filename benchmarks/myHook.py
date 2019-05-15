@@ -98,7 +98,7 @@ class BenchmarksHook(wiji.hook.BaseHook):
             sys.exit(99)
 
         if state == wiji.task.TaskState.QUEUED:
-            queuing_duration = float("{0:.2f}".format(queuing_duration["monotonic"]))
+            queuing_duration = float("{0:.4f}".format(queuing_duration["monotonic"]))
             tasks_queued = await myMet.incr(
                 counter_name="tasks_queued_counter_{0}".format(task_name)
             )
@@ -120,7 +120,7 @@ class BenchmarksHook(wiji.hook.BaseHook):
 
         elif state == wiji.task.TaskState.EXECUTED:
             await self.set_host_metrics()
-            execution_duration = float("{0:.2f}".format(execution_duration["monotonic"]))
+            execution_duration = float("{0:.4f}".format(execution_duration["monotonic"]))
             tasks_dequeued = await myMet.incr(
                 counter_name="tasks_dequeued_counter_{0}".format(task_name)
             )
