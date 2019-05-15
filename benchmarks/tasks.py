@@ -2,7 +2,6 @@ import os
 import sys
 import random
 import string
-import asyncio
 import logging
 import hashlib
 
@@ -146,9 +145,6 @@ class MemTask(BaseTask):
                 "stored_string_size_MB": stored_string_size / 1_000_000,
             },
         )
-        # hold it in memory for sometime
-        await asyncio.sleep(0.25)
-        del stored_string
 
 
 class DividerTask(BaseTask):
