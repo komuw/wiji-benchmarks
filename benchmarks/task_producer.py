@@ -9,7 +9,7 @@ from benchmarks import tasks
 #  python benchmarks/task_producer.py
 
 
-max_tasks_to_queue: int = 10_004
+max_tasks_to_queue: int = 20_004
 
 
 async def produce_disk_io_task() -> None:
