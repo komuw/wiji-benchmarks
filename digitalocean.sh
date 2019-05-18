@@ -7,22 +7,21 @@ else
     set -eo pipefail
 fi
 shopt -s nullglob globstar
-export DEBIAN_FRONTEND=noninteractive
 
+export DEBIAN_FRONTEND=noninteractive
 
 apt -y update && \
 apt -y install python && \
 apt -y install python-pip && \
-pip install -U pip
-
-# also installs docker-compose
-snap install docker
-
+pip install -U pip && \
+snap install docker && \
+pip install -U docker-compose && \
 apt -y install wget unzip && \
 wget https://github.com/komuw/wiji-benchmarks/archive/master.zip && \
-unzip master.zip
-
+unzip master.zip && \
 cd wiji-benchmarks-master/
+
+
 # edit `compose.env` to add neccesary credentials
 screen -S wiji
 docker-compose up --build
