@@ -75,12 +75,15 @@ class NetworkIOTask(BaseTask):
     async def run(self, *args, **kwargs):
         url = "http://slow_app:8080/"
 
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
-                res_text = await resp.text()
-                self.logger.log(
-                    logging.INFO, {"event": "NetworkIOTask_run", "response": res_text[:50]}
-                )
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as resp:
+                    res_text = await resp.text()
+                    self.logger.log(
+                        logging.INFO, {"event": "NetworkIOTask_run", "response": res_text[:50]}
+                    )
+        except aiohttp.ClientError:
+            await self.retry(task_options=wiji.task.TaskOptions(max_retries=2))
 
 
 class CPUTask(BaseTask):
