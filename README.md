@@ -21,7 +21,7 @@ This benchmark does the following:
 
 ### Usage:
 
-You can run this benchmarks/examples using either on a Redis broker or an AWS SQS broker.     
+You can run this benchmarks/examples using either on a Redis broker or [`wijisqs`](https://github.com/komuw/wijisqs) which is a `wiji` broker that uses [AWS SQS](https://aws.amazon.com/sqs/).     
 
 The broker in use(redis or SQS) is controlled via environment variables.     
 The environment variables are stored in the file called `compose.env`     
@@ -33,3 +33,10 @@ Once you have set the neccessary environment variables, run:
 ```bash
 docker-compose up
 ```    
+
+### Results:
+The benchmark was run on a $5/month digitalocean server with 1GB of RAM and 1 cpu.    
+The server was located in San francisco.   
+The broker in use was [`wijisqs`](https://github.com/komuw/wijisqs) which is a `wiji` broker that uses [AWS SQS](https://aws.amazon.com/sqs/).    
+The SQS broker was located in Ireland(eu-west-1).    
+The ping latency between digitalocean Sanfrancisco and AWS Ireland was about `152 ms`  
