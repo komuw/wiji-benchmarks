@@ -1,5 +1,4 @@
 import asyncio
-import hashlib
 from unittest import TestCase, mock
 
 import wiji
@@ -26,9 +25,9 @@ class TestTasks(TestCase):
         return loop.run_until_complete(coro)
 
     def test_cpu_task(self):
-        with mock.patch.object(
-            BaseTask, "the_broker", wiji.broker.InMemoryBroker()
-        ) as mock_broker, mock.patch("benchmarks.tasks.hashlib.blake2b") as mock_blake2b:
+        with mock.patch.object(BaseTask, "the_broker", wiji.broker.InMemoryBroker()), mock.patch(
+            "benchmarks.tasks.hashlib.blake2b"
+        ) as mock_blake2b:
             task = CPUTask()
             task.synchronous_delay()
 
