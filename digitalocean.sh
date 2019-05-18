@@ -12,8 +12,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 apt -y update && \
 apt -y install python && \
-apt -y install python-pip
-
+apt -y install python-pip && \
 pip install -U pip
 
 # also installs docker-compose
