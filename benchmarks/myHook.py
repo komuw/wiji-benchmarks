@@ -53,6 +53,9 @@ class BenchmarksHook(wiji.hook.BaseHook):
         execution_exception: typing.Union[None, Exception] = None,
         return_value: typing.Union[None, typing.Any] = None,
     ) -> None:
+
+        await self.set_host_metrics()
+
         try:
             if not isinstance(queuing_exception, type(None)):
                 raise ValueError(
@@ -119,7 +122,6 @@ class BenchmarksHook(wiji.hook.BaseHook):
             )
 
         elif state == wiji.task.TaskState.EXECUTED:
-            await self.set_host_metrics()
             execution_duration = float("{0:.4f}".format(execution_duration["monotonic"]))
             tasks_dequeued = await myMet.incr(
                 counter_name="tasks_dequeued_counter_{0}".format(task_name)
