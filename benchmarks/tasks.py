@@ -73,8 +73,7 @@ class NetworkIOTask(BaseTask):
     task_name = "task_name-{0}".format(queue_name)
 
     async def run(self, *args, **kwargs):
-        latency = random.randint(1, 4) / 10  # latency in seconds
-        url = "https://httpbin.org/delay/{latency}".format(latency=latency)
+        url = "http://slow_app:8080/"
 
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as resp:
