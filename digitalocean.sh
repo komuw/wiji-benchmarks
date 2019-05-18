@@ -22,4 +22,4 @@ cd wiji-benchmarks-master/
 
 # edit `compose.env` to add neccesary credentials
 screen -S wiji
-docker-compose up --build
+docker-compose up
