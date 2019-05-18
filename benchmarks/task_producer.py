@@ -48,8 +48,9 @@ async def produce_ram_bound_task() -> None:
     """
     queue `max_tasks_to_queue` of RAM bound tasks.
     """
+    t = tasks.MemTask()
     for i in range(0, max_tasks_to_queue):
-        await tasks.MemTask().delay()
+        await t.delay()
 
 
 async def produce_adder_task() -> None:
