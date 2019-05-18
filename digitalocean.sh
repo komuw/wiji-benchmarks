@@ -15,7 +15,6 @@ apt -y install python && \
 apt -y install python-pip && \
 pip install -U pip && \
 snap install docker && \
-pip install -U docker-compose && \
 apt -y install wget unzip && \
 wget https://github.com/komuw/wiji-benchmarks/archive/master.zip && \
 unzip master.zip && \
