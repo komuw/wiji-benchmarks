@@ -6,6 +6,17 @@ services:
     ports:
       - "6379:6379"
 
+  slow_app:
+    build:
+      context: .
+      dockerfile: proxy/slow_appDockerfile
+    volumes:
+      - ./:/usr/src/app
+    env_file:
+      - compose.env
+    ports:
+      - "8080:8080"
+
   task_producer:
     build:
       context: .
@@ -27,6 +38,7 @@ services:
       - compose.env
     depends_on:
       - redis
+      - slow_app
 
   metrics:
     build:
