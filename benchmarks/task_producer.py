@@ -16,7 +16,6 @@ async def produce_disk_io_task() -> None:
     """
     queue `max_tasks_to_queue` of disk IO bound tasks.
     """
-    t = tasks.DiskIOTask()
     for i in range(0, max_tasks_to_queue):
         filename = (
             "/tmp/"
@@ -25,15 +24,16 @@ async def produce_disk_io_task() -> None:
             + str(i)
             + ".txt"
         )
-        await t.delay(filename=filename)
+        await tasks.DiskIOTask().delay(filename=filename)
 
 
 async def produce_network_io_task() -> None:
     """
     queue `max_tasks_to_queue` of network IO bound tasks.
     """
+    t = tasks.NetworkIOTask()
     for i in range(0, max_tasks_to_queue):
-        await tasks.NetworkIOTask().delay()
+        await t.delay()
 
 
 async def produce_cpu_bound_task() -> None:
@@ -59,8 +59,9 @@ async def produce_adder_task() -> None:
     queue `max_tasks_to_queue` of adder tasks.
     Those will in turn generate `max_tasks_to_queue` divider tasks
     """
+    t = tasks.AdderTask()
     for i in range(0, max_tasks_to_queue):
-        await tasks.AdderTask().delay(a=90, b=88)
+        await t.delay(a=90, b=88)
 
 
 async def main() -> None:
