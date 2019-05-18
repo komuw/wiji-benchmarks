@@ -1,22 +1,9 @@
 ## wiji-benchmarks     
-[![CircleCI](https://circleci.com/gh/komuw/wiji-benchmarks.svg?style=svg)](https://circleci.com/gh/komuw/wiji-benchmarks)
-
-This benchmark, show how `wiji` performs when executing different types of tasks/workloads.   
-
-You can run this benchmarks/examples either on a Redis broker or using AWS SQS broker.     
-
-The broker in use(redis or SQS) is controlled via environment variables.     
-The environment variables are stored in the file called `compose.env`     
-
-By default, when you `docker-compose up`, the benchmarks is run using the redis broker included in this repo.    
-To use AWS SQS, edit `compose.env` so as to set the environment variable `USE_SQS=YES` additionally the environment variables; `AWS_REGION_NAME`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` should be set to appropriate values based on your AWS account.    
+[![CircleCI](https://circleci.com/gh/komuw/wiji-benchmarks.svg?style=svg)](https://circleci.com/gh/komuw/wiji-benchmarks)  
 
 
-run:     
-```bash
-docker-compose up --build
-```    
-
+### What:
+This benchmark, show how [`wiji`](https://github.com/komuw/wiji) performs when executing different types of tasks/workloads.  
 
 This benchmark does the following:  
 - It queues about 20,000(20K) network IO bound tasks. Each of these tasks makes a newtwork request to a backend with a latency that varies between 100 and 400 milliseconds.    
@@ -32,7 +19,17 @@ This benchmark does the following:
 - All these operations happen concurrently.   
 
 
-stats:
+### Usage:
+
+You can run this benchmarks/examples using either on a Redis broker or an AWS SQS broker.     
+
+The broker in use(redis or SQS) is controlled via environment variables.     
+The environment variables are stored in the file called `compose.env`     
+
+By default, when you `docker-compose up`, the benchmarks is run using the redis broker included in this repo.    
+To use AWS SQS, edit `compose.env` so as to set the environment variable `USE_SQS=YES` additionally the environment variables; `AWS_REGION_NAME`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` should be set to appropriate values based on your AWS account.    
+
+Once you have set the neccessary environment variables, run:     
 ```bash
-docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}\t{{.NetIO}}\t{{.BlockIO}}\t{{.PIDs}}\t"
-```
+docker-compose up
+```    
