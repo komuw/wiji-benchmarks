@@ -16,6 +16,7 @@ async def produce_disk_io_task() -> None:
     """
     queue `max_tasks_to_queue` of disk IO bound tasks.
     """
+    t = tasks.DiskIOTask()
     for i in range(0, max_tasks_to_queue):
         filename = (
             "/tmp/"
@@ -24,7 +25,7 @@ async def produce_disk_io_task() -> None:
             + str(i)
             + ".txt"
         )
-        await tasks.DiskIOTask().delay(filename=filename)
+        await t.delay(filename=filename)
 
 
 async def produce_network_io_task() -> None:
