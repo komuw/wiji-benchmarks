@@ -3,7 +3,7 @@ from unittest import TestCase, mock
 
 import wiji
 
-from benchmarks.tasks import BaseTask, CPUTask
+from benchmarks.tasks import CPUTask
 
 
 class TestTasks(TestCase):
@@ -25,7 +25,7 @@ class TestTasks(TestCase):
         return loop.run_until_complete(coro)
 
     def test_cpu_task(self):
-        with mock.patch.object(BaseTask, "the_broker", wiji.broker.InMemoryBroker()), mock.patch(
+        with mock.patch.object(CPUTask, "the_broker", wiji.broker.InMemoryBroker()), mock.patch(
             "benchmarks.tasks.hashlib.blake2b"
         ) as mock_blake2b:
             task = CPUTask()
