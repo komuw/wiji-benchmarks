@@ -39,8 +39,9 @@ async def produce_cpu_bound_task() -> None:
     """
     queue `max_tasks_to_queue` of cpu bound tasks.
     """
+    t = tasks.CPUTask()
     for i in range(0, max_tasks_to_queue):
-        await tasks.CPUTask().delay()
+        await t.delay()
 
 
 async def produce_ram_bound_task() -> None:
