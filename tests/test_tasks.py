@@ -25,7 +25,9 @@ class TestTasks(TestCase):
         return loop.run_until_complete(coro)
 
     def test_cpu_task(self):
-        with mock.patch.object(CPUTask, "the_broker", wiji.broker.InMemoryBroker()), mock.patch(
+        with mock.patch.object(
+            CPUTask, "the_broker", wiji.broker.InMemoryBroker()
+        ), mock.patch.object(CPUTask, "the_hook", wiji.hook.SimpleHook()), mock.patch(
             "benchmarks.tasks.hashlib.blake2b"
         ) as mock_blake2b:
             task = CPUTask()
