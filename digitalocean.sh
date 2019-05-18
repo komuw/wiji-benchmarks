@@ -13,7 +13,6 @@ export DEBIAN_FRONTEND=noninteractive
 apt -y update && \
 apt -y install python && \
 apt -y install python-pip && \
-pip install -U pip && \
 snap install docker && \
 apt -y install wget unzip && \
 wget https://github.com/komuw/wiji-benchmarks/archive/master.zip && \
