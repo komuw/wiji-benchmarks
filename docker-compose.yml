@@ -9,7 +9,7 @@ services:
   slow_app:
     build:
       context: .
-      dockerfile: proxy/slow_appDockerfile
+      dockerfile: slow_app/Dockerfile
     volumes:
       - ./:/usr/src/app
     env_file:
