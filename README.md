@@ -19,7 +19,7 @@ docker-compose up --build
 
 
 This benchmark does the following:  
-- It queues about 20,000(20K) network IO bound task. Each of these tasks makes a newtwork request to a backend with a latency that varies between 100 and 400 milliseconds.    
+- It queues about 20,000(20K) network IO bound tasks. Each of these tasks makes a newtwork request to a backend with a latency that varies between 100 and 400 milliseconds.    
 - It queues about 20,000 disk IO bound tasks. Each of these tasks creates a random file, generates a random 16KB text, opens the file, writes that 16KB text to it & closes that file  and then finally it deletes that file.   
   16KB is approximately the same size as the novel; [`The Raven` by `Edgar Allan Poe`](https://en.wikipedia.org/wiki/The_Raven)
 - It queues about 20,000 CPU bound tasks. Each of these tasks generates a 16KB text, does blake2 hash of it, encrypts the text and then decrypts it.   
