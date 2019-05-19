@@ -17,7 +17,8 @@ snap install docker && \
 apt -y install wget unzip && \
 wget https://github.com/komuw/wiji-benchmarks/archive/master.zip && \
 unzip master.zip && \
-cd wiji-benchmarks-master/
+mv wiji-benchmarks-master/ wiji-benchmarks && \
+cd wiji-benchmarks/
 
 
 # edit `compose.env` to add neccesary credentials
