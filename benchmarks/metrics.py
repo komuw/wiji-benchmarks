@@ -352,7 +352,7 @@ def main():
             print("\n\n\t")
             sys.exit(101)
 
-    asyncio.run(async_main(delay_duration=10), debug=True)  # mins
+    asyncio.run(async_main(delay_duration=2 * 60), debug=True)  # mins
 
 
 if __name__ == "__main__":
