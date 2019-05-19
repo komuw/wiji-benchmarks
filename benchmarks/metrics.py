@@ -15,6 +15,10 @@ import matplotlib.pyplot as plt
 from benchmarks import tasks
 
 
+CURRENT_DIR = os.getcwd()
+RESULTS_DIR = CURRENT_DIR + "/RESULTS_DIR/"
+
+
 class Metrics:
     """
     This keeps track of how many tasks of each type;
@@ -141,7 +145,7 @@ async def stream_metrics(delay_duration):
             val = await met.get(key=met_name)
             queuing_metrics.append(val)
         logger.log(logging.INFO, {"event": "stream_metric", "queuing_metrics": queuing_metrics})
-        with open("/tmp/metrics/queuing_metrics.json", mode="w") as f:  # overrite file
+        with open("{0}queuing_metrics.json".format(RESULTS_DIR), mode="w") as f:  # overrite file
             f.write(json.dumps(queuing_metrics))
 
         host_metrics = await met.lrange(name="host_metrics")
@@ -150,7 +154,7 @@ async def stream_metrics(delay_duration):
         new_host_metrics = []
         for i in host_metrics:
             new_host_metrics.append(i.decode())
-        with open("/tmp/metrics/host_metrics.json", mode="w") as f:
+        with open("{0}host_metrics.json".format(RESULTS_DIR), mode="w") as f:
             f.write(json.dumps(new_host_metrics))
 
         await asyncio.sleep(delay_duration)
@@ -178,7 +182,7 @@ def generate_queuing_met_markdown(task_queuing_metrics):
         all_res.append(_result)
 
     final_markdwon = result_head + "".join(all_res)
-    with open("./tmp/metrics/queuing_metrics.md", mode="w") as f:
+    with open("{0}queuing_metrics.md".format(RESULTS_DIR), mode="w") as f:
         f.write(final_markdwon)
 
 
@@ -197,7 +201,7 @@ async def combine_queuing_metrics(delay_duration):
             # }
         }
         await asyncio.sleep(delay_duration + (delay_duration / 6))
-        with open("/tmp/metrics/queuing_metrics.json", mode="r") as f:
+        with open("{0}queuing_metrics.json".format(RESULTS_DIR), mode="r") as f:
             met = f.read()
             queuing_metrics = json.loads(met)
 
@@ -222,14 +226,14 @@ async def combine_queuing_metrics(delay_duration):
                     {"execution_duration": task_met.get("execution_duration")}
                 )
 
-        # with open("/tmp/metrics/final_queuing_metrics.json", mode="w") as f:
+        # with open("{0}final_queuing_metrics.json".format(RESULTS_DIR), mode="w") as f:
         #     f.write(json.dumps(task_queuing_metrics, indent=2))
         generate_queuing_met_markdown(task_queuing_metrics=task_queuing_metrics)
 
 
 def get_host_met():
     new_host_metrics = []
-    with open("/tmp/metrics/host_metrics.json", mode="r") as f:
+    with open("{0}host_metrics.json".format(RESULTS_DIR), mode="r") as f:
         met = f.read()
         host_metrics = json.loads(met)
         for i in host_metrics:
@@ -266,7 +270,7 @@ def get_mem_metrics(new_host_metrics):
         max_lim = TOTAL_RAM
     plt.ylim(0, max_lim)
 
-    mem_graph = "/tmp/metrics/rss_mem_over_time.png"
+    mem_graph = "{0}rss_mem_over_time.png".format(RESULTS_DIR)
     if os.path.exists(mem_graph):
         # so that it can be overritten
         os.remove(mem_graph)
@@ -289,7 +293,7 @@ def get_cpu_metrics(new_host_metrics):
     plt.title("CPU usage.")
     plt.ylim(0, 100)
 
-    cpu_graph = "/tmp/metrics/cpu_percent_over_time.png"
+    cpu_graph = "{0}cpu_percent_over_time.png".format(RESULTS_DIR)
     if os.path.exists(cpu_graph):
         # so that it can be overritten
         os.remove(cpu_graph)
@@ -312,6 +316,9 @@ def main():
 
     async def async_main(delay_duration) -> None:
         try:
+            if not os.path.exists(RESULTS_DIR):
+                os.makedirs(RESULTS_DIR)
+
             gather_tasks = asyncio.gather(
                 stream_metrics(delay_duration=delay_duration),
                 combine_queuing_metrics(delay_duration=delay_duration),

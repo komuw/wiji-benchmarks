@@ -50,4 +50,4 @@ coverage.xml
 sphinx-build
 
 # metrics folder
-/tmp
+/RESULTS_DIR
