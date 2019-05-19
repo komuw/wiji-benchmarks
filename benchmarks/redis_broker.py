@@ -42,20 +42,30 @@ class ExampleRedisBroker(wiji.broker.BaseBroker):
             socket_connect_timeout=8,
             socket_timeout=8,
         )
+        self._LOOP = None
+
+    def _get_pool(self):
+        if self._LOOP:
+            return self._LOOP
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.get_event_loop()
+        except Exception as e:
+            raise e
+
+        self._LOOP = loop
+        return self._LOOP
 
     async def check(self, queue_name: str) -> None:
         await asyncio.sleep(1 / 117)
 
     async def enqueue(self, item: str, queue_name: str) -> None:
-        try:
-            self.loop = asyncio.get_running_loop()
-        except RuntimeError:
-            self.loop = asyncio.get_event_loop()
 
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix="wiji-redis-thread-pool"
         ) as executor:
-            await self.loop.run_in_executor(
+            await self._get_pool().run_in_executor(
                 executor,
                 functools.partial(self._blocking_enqueue, queue_name=queue_name, item=item),
             )
@@ -64,16 +74,11 @@ class ExampleRedisBroker(wiji.broker.BaseBroker):
         self.redis_instance.lpush(queue_name, item)
 
     async def dequeue(self, queue_name: str) -> str:
-        try:
-            self.loop = asyncio.get_running_loop()
-        except RuntimeError:
-            self.loop = asyncio.get_event_loop()
-
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix="wiji-redis-thread-pool"
         ) as executor:
             while True:
-                item = await self.loop.run_in_executor(
+                item = await self._get_pool().run_in_executor(
                     executor, functools.partial(self._blocking_dequeue, queue_name=queue_name)
                 )
                 if item:
