@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import uuid
 import typing
@@ -310,12 +311,18 @@ def main():
     """
 
     async def async_main(delay_duration) -> None:
-        gather_tasks = asyncio.gather(
-            stream_metrics(delay_duration=delay_duration),
-            combine_queuing_metrics(delay_duration=delay_duration),
-            combine_host_metrics(delay_duration=delay_duration),
-        )
-        await gather_tasks
+        try:
+            gather_tasks = asyncio.gather(
+                stream_metrics(delay_duration=delay_duration),
+                combine_queuing_metrics(delay_duration=delay_duration),
+                combine_host_metrics(delay_duration=delay_duration),
+            )
+            await gather_tasks
+        except Exception as e:
+            print("\n\n\t")
+            print("execption:", e)
+            print("\n\n\t")
+            sys.exit(101)
 
     asyncio.run(async_main(delay_duration=5 * 60), debug=True)  # mins
 
