@@ -61,7 +61,6 @@ class ExampleRedisBroker(wiji.broker.BaseBroker):
         await asyncio.sleep(1 / 117)
 
     async def enqueue(self, item: str, queue_name: str) -> None:
-
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix="wiji-redis-thread-pool"
         ) as executor:
