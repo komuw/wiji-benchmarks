@@ -226,8 +226,8 @@ async def combine_queuing_metrics(delay_duration):
                     {"execution_duration": task_met.get("execution_duration")}
                 )
 
-        # with open("{0}final_queuing_metrics.json".format(RESULTS_DIR), mode="w") as f:
-        #     f.write(json.dumps(task_queuing_metrics, indent=2))
+        with open("{0}final_queuing_metrics.json".format(RESULTS_DIR), mode="w") as f:
+            f.write(json.dumps(task_queuing_metrics, indent=2))
         generate_queuing_met_markdown(task_queuing_metrics=task_queuing_metrics)
 
 
