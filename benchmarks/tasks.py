@@ -73,7 +73,7 @@ class NetworkIOTask(BaseTask):
     task_name = "task_name-{0}".format(queue_name)
 
     async def run(self, *args, **kwargs):
-        url = "http://slow_app:8080/"
+        url = "http://slow_app:8080/slow"
 
         try:
             async with aiohttp.ClientSession() as session:
