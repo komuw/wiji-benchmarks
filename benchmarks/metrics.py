@@ -146,7 +146,7 @@ async def stream_metrics(delay_duration):
             queuing_metrics.append(val)
         logger.log(logging.INFO, {"event": "stream_metric", "queuing_metrics": queuing_metrics})
         with open("{0}queuing_metrics.json".format(RESULTS_DIR), mode="w") as f:  # overrite file
-            f.write(json.dumps(queuing_metrics))
+            f.write(json.dumps(queuing_metrics, indent=2))
 
         host_metrics = await met.lrange(name="host_metrics")
         logger.log(logging.INFO, {"event": "stream_metric", "host_metrics": host_metrics})
@@ -155,7 +155,7 @@ async def stream_metrics(delay_duration):
         for i in host_metrics:
             new_host_metrics.append(i.decode())
         with open("{0}host_metrics.json".format(RESULTS_DIR), mode="w") as f:
-            f.write(json.dumps(new_host_metrics))
+            f.write(json.dumps(new_host_metrics, indent=2))
 
         await asyncio.sleep(delay_duration)
 
