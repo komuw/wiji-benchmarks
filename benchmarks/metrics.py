@@ -155,46 +155,46 @@ async def stream_metrics(delay_duration):
         await asyncio.sleep(delay_duration)
 
 
-async def combine_queuing_metrics(delay_duration):
-    """
-    create markdown file with table with queueing metrics.
-    """
-
-    def generate_queuing_met_markdown(task_queuing_metrics):
-        # kept this way to preserve markdown formatting
-        result_head = """Queuing metrics results:
+def generate_queuing_met_markdown(task_queuing_metrics):
+    # kept this way to preserve markdown formatting
+    result_head = """Queuing metrics results:
 | Task name      |  Number of tasks queued  | Time to queue 1 task(sec) | Number of tasks dequeued | Time to execute 1 task(sec) |
 | :---           |  ---:                    |  ---:                     |   ---:                   |  ---:                       |
 """
 
-        result_body = """| {task_name}    |  {tasks_queued}          |  {queuing_duration}       |  {tasks_dequeued}        |  {execution_duration}       |
+    result_body = """| {task_name}    |  {tasks_queued}          |  {queuing_duration}       |  {tasks_dequeued}        |  {execution_duration}       |
 """
 
-        all_res = []
-        for i in task_queuing_metrics.keys():
-            _result = result_body.format(
-                task_name=i,
-                tasks_queued=task_queuing_metrics[i].get("tasks_queued"),
-                queuing_duration=task_queuing_metrics[i].get("queuing_duration"),
-                tasks_dequeued=task_queuing_metrics[i].get("tasks_dequeued"),
-                execution_duration=task_queuing_metrics[i].get("execution_duration"),
-            )
-            all_res.append(_result)
+    all_res = []
+    for i in task_queuing_metrics.keys():
+        _result = result_body.format(
+            task_name=i,
+            tasks_queued=task_queuing_metrics[i].get("tasks_queued"),
+            queuing_duration=task_queuing_metrics[i].get("queuing_duration"),
+            tasks_dequeued=task_queuing_metrics[i].get("tasks_dequeued"),
+            execution_duration=task_queuing_metrics[i].get("execution_duration"),
+        )
+        all_res.append(_result)
 
-        final_markdwon = result_head + "".join(all_res)
-        with open("./tmp/metrics/queuing_metrics.md", mode="w") as f:
-            f.write(final_markdwon)
+    final_markdwon = result_head + "".join(all_res)
+    with open("./tmp/metrics/queuing_metrics.md", mode="w") as f:
+        f.write(final_markdwon)
 
-    queuing_metrics = None
-    task_queuing_metrics = {
-        # "MyExampleTask1": {
-        #     "tasks_queued": 45,
-        #     "queuing_duration": 0.98,
-        #     "tasks_dequeued": 3,
-        #     "execution_duration": 0.56,
-        # }
-    }
+
+async def combine_queuing_metrics(delay_duration):
+    """
+    create markdown file with table with queueing metrics.
+    """
     while True:
+        queuing_metrics = None
+        task_queuing_metrics = {
+            # "MyExampleTask1": {
+            #     "tasks_queued": 45,
+            #     "queuing_duration": 0.98,
+            #     "tasks_dequeued": 3,
+            #     "execution_duration": 0.56,
+            # }
+        }
         await asyncio.sleep(delay_duration + (delay_duration / 6))
         with open("/tmp/metrics/queuing_metrics.json", mode="r") as f:
             met = f.read()
@@ -226,73 +226,76 @@ async def combine_queuing_metrics(delay_duration):
         generate_queuing_met_markdown(task_queuing_metrics=task_queuing_metrics)
 
 
+def get_host_met():
+    new_host_metrics = []
+    with open("/tmp/metrics/host_metrics.json", mode="r") as f:
+        met = f.read()
+        host_metrics = json.loads(met)
+        for i in host_metrics:
+            new_host_metrics.append(json.loads(i))
+    return new_host_metrics
+
+
+def get_mem_metrics(new_host_metrics):
+    """
+    To plot/graph:
+        1. create figure
+        2. plt.plot
+        3. style, add x-y labels
+        4. plt.legend, plt.title, plt.ylim
+        5. plt.savefig
+    """
+    TOTAL_RAM = new_host_metrics[0]["total_ram"]
+    rss_mem_over_time = []
+    for i in new_host_metrics:
+        rss_mem_over_time.append(i["rss_mem"])
+
+    plt.figure("mem-{0}".format(str(uuid.uuid4())))
+    plt.plot(rss_mem_over_time, color="green", label="rss memory")
+    # plt.plot(total_ram_array, color="blue", label="total memory")  # 2graphs in one
+    plt.style.use("seaborn-whitegrid")
+    plt.ylabel("Memory usage (MB)")
+    plt.xlabel("time")
+    plt.legend()  # legend(loc="upper right")
+    plt.title("Memory usage. Total Memory={0} MB".format(int(TOTAL_RAM)))
+
+    max_lim = TOTAL_RAM / 6
+    if TOTAL_RAM < 2040:
+        # less than 2GB
+        max_lim = TOTAL_RAM
+    plt.ylim(0, max_lim)
+
+    mem_graph = "/tmp/metrics/rss_mem_over_time.png"
+    if os.path.exists(mem_graph):
+        # so that it can be overritten
+        os.remove(mem_graph)
+    plt.savefig(mem_graph)
+
+
+def get_cpu_metrics(new_host_metrics):
+    cpu_percent_over_time = []
+    for i in new_host_metrics:
+        cpu_percent_over_time.append(i["cpu_percent"])
+
+    plt.figure(
+        "cpu-{0}".format(str(uuid.uuid4()))
+    )  # creates new named instance instead of re-using
+    plt.plot(cpu_percent_over_time, color="green", label="cpu_percent")
+    plt.style.use("seaborn-whitegrid")
+    plt.ylabel("CPU usage (%)")
+    plt.xlabel("time")
+    plt.legend()
+    plt.title("CPU usage.")
+    plt.ylim(0, 100)
+
+    cpu_graph = "/tmp/metrics/cpu_percent_over_time.png"
+    if os.path.exists(cpu_graph):
+        # so that it can be overritten
+        os.remove(cpu_graph)
+    plt.savefig(cpu_graph)
+
+
 async def combine_host_metrics(delay_duration):
-    def get_host_met():
-        new_host_metrics = []
-        with open("/tmp/metrics/host_metrics.json", mode="r") as f:
-            met = f.read()
-            host_metrics = json.loads(met)
-            for i in host_metrics:
-                new_host_metrics.append(json.loads(i))
-        return new_host_metrics
-
-    def get_mem_metrics(new_host_metrics):
-        """
-        To plot/graph:
-          1. create figure
-          2. plt.plot
-          3. style, add x-y labels
-          4. plt.legend, plt.title, plt.ylim
-          5. plt.savefig
-        """
-        TOTAL_RAM = new_host_metrics[0]["total_ram"]
-        rss_mem_over_time = []
-        for i in new_host_metrics:
-            rss_mem_over_time.append(i["rss_mem"])
-
-        plt.figure("mem-{0}".format(str(uuid.uuid4())))
-        plt.plot(rss_mem_over_time, color="green", label="rss memory")
-        # plt.plot(total_ram_array, color="blue", label="total memory")  # 2graphs in one
-        plt.style.use("seaborn-whitegrid")
-        plt.ylabel("Memory usage (MB)")
-        plt.xlabel("time")
-        plt.legend()  # legend(loc="upper right")
-        plt.title("Memory usage. Total Memory={0} MB".format(int(TOTAL_RAM)))
-
-        max_lim = TOTAL_RAM / 6
-        if TOTAL_RAM < 2040:
-            # less than 2GB
-            max_lim = TOTAL_RAM
-        plt.ylim(0, max_lim)
-
-        mem_graph = "/tmp/metrics/rss_mem_over_time.png"
-        if os.path.exists(mem_graph):
-            # so that it can be overritten
-            os.remove(mem_graph)
-        plt.savefig(mem_graph)
-
-    def get_cpu_metrics(new_host_metrics):
-        cpu_percent_over_time = []
-        for i in new_host_metrics:
-            cpu_percent_over_time.append(i["cpu_percent"])
-
-        plt.figure(
-            "cpu-{0}".format(str(uuid.uuid4()))
-        )  # creates new named instance instead of re-using
-        plt.plot(cpu_percent_over_time, color="green", label="cpu_percent")
-        plt.style.use("seaborn-whitegrid")
-        plt.ylabel("CPU usage (%)")
-        plt.xlabel("time")
-        plt.legend()
-        plt.title("CPU usage.")
-        plt.ylim(0, 100)
-
-        cpu_graph = "/tmp/metrics/cpu_percent_over_time.png"
-        if os.path.exists(cpu_graph):
-            # so that it can be overritten
-            os.remove(cpu_graph)
-        plt.savefig(cpu_graph)
-
     while True:
         await asyncio.sleep(delay_duration + (delay_duration / 6))
         new_host_metrics = get_host_met()
