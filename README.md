@@ -6,13 +6,13 @@
 This benchmark, show how [`wiji`](https://github.com/komuw/wiji) performs when executing different types of tasks/workloads.  
 
 This benchmark does the following:  
-- It queues about 10,000(10K) network IO bound tasks. Each of these tasks makes a newtwork request to a backend with a latency that varies between 100 and 400 milliseconds.    
-- It queues about 10,000 disk IO bound tasks. Each of these tasks creates a random file, generates a random 16KB text, opens the file, writes that 16KB text to it & closes that file  and then finally it deletes that file.   
+- It queues about 100,000(100K) network IO bound tasks. Each of these tasks makes a newtwork request to a backend with a latency that varies between 100 and 400 milliseconds.    
+- It queues about 100,000 disk IO bound tasks. Each of these tasks creates a random file, generates a random 16KB text, opens the file, writes that 16KB text to it & closes that file  and then finally it deletes that file.   
   16KB is approximately the same size as the novel; [`The Raven` by `Edgar Allan Poe`](https://en.wikipedia.org/wiki/The_Raven)
-- It queues about 10,000 CPU bound tasks. Each of these tasks generates a 16KB text, does blake2 hash of it, encrypts the text and then decrypts it.   
-- It queues about 10,000 memory bound tasks. Each of these tasks calculates how much free RAM there is, then stores something in RAM that is equal to 10% of the free RAM.    
-- It queues about 10,000 tasks each of which adds two numbers together.   
-- It queues about 10,000 tasks each of which performs division of two numbers.   
+- It queues about 100,000 CPU bound tasks. Each of these tasks generates a 16KB text, does blake2 hash of it, encrypts the text and then decrypts it.   
+- It queues about 100,000 memory bound tasks. Each of these tasks calculates how much free RAM there is, then stores something in RAM that is equal to 10% of the free RAM.    
+- It queues about 100,000 tasks each of which adds two numbers together.   
+- It queues about 100,000 tasks each of which performs division of two numbers.   
 
 - It dequeues and executes all the above tasks.   
 
