@@ -145,8 +145,13 @@ async def stream_metrics(delay_duration):
             val = await met.get(key=met_name)
             queuing_metrics.append(val)
         logger.log(logging.INFO, {"event": "stream_metric", "queuing_metrics": queuing_metrics})
-        with open("{0}queuing_metrics.json".format(RESULTS_DIR), mode="w") as f:  # overrite file
-            f.write(json.dumps(queuing_metrics, indent=2))
+
+        the_file = "{0}queuing_metrics.json".format(RESULTS_DIR)
+        if os.path.exists(the_file):
+            os.remove(the_file)
+        f = open(the_file, mode="w")  # overrite file
+        f.write(json.dumps(queuing_metrics, indent=2))
+        f.close()
 
         host_metrics = await met.lrange(name="host_metrics")
         logger.log(logging.INFO, {"event": "stream_metric", "host_metrics": host_metrics})
@@ -154,8 +159,13 @@ async def stream_metrics(delay_duration):
         new_host_metrics = []
         for i in host_metrics:
             new_host_metrics.append(i.decode())
-        with open("{0}host_metrics.json".format(RESULTS_DIR), mode="w") as f:
-            f.write(json.dumps(new_host_metrics, indent=2))
+
+        the_file = "{0}host_metrics.json".format(RESULTS_DIR)
+        if os.path.exists(the_file):
+            os.remove(the_file)
+        f = open(the_file, mode="w")
+        f.write(json.dumps(new_host_metrics, indent=2))
+        f.close()
 
         await asyncio.sleep(delay_duration)
 
@@ -182,8 +192,13 @@ def generate_queuing_met_markdown(task_queuing_metrics):
         all_res.append(_result)
 
     final_markdwon = result_head + "".join(all_res)
-    with open("{0}queuing_metrics.md".format(RESULTS_DIR), mode="w") as f:
-        f.write(final_markdwon)
+
+    the_file = "{0}queuing_metrics.md".format(RESULTS_DIR)
+    if os.path.exists(the_file):
+        os.remove(the_file)
+    f = open(the_file, mode="w")
+    f.write(final_markdwon)
+    f.close()
 
 
 async def combine_queuing_metrics(delay_duration):
@@ -201,9 +216,10 @@ async def combine_queuing_metrics(delay_duration):
             # }
         }
         await asyncio.sleep(delay_duration + (delay_duration / 6))
-        with open("{0}queuing_metrics.json".format(RESULTS_DIR), mode="r") as f:
-            met = f.read()
-            queuing_metrics = json.loads(met)
+        f = open("{0}queuing_metrics.json".format(RESULTS_DIR), mode="r")
+        met = f.read()
+        f.close()
+        queuing_metrics = json.loads(met)
 
         for task_met in queuing_metrics:
             if task_queuing_metrics.get(task_met["task_name"]) is None:
@@ -226,18 +242,23 @@ async def combine_queuing_metrics(delay_duration):
                     {"execution_duration": task_met.get("execution_duration")}
                 )
 
-        with open("{0}final_queuing_metrics.json".format(RESULTS_DIR), mode="w") as f:
-            f.write(json.dumps(task_queuing_metrics, indent=2))
+        the_file = "{0}final_queuing_metrics.json".format(RESULTS_DIR)
+        if os.path.exists(the_file):
+            os.remove(the_file)
+        f = open(the_file, mode="w")
+        f.write(json.dumps(task_queuing_metrics, indent=2))
+        f.close()
         generate_queuing_met_markdown(task_queuing_metrics=task_queuing_metrics)
 
 
 def get_host_met():
     new_host_metrics = []
-    with open("{0}host_metrics.json".format(RESULTS_DIR), mode="r") as f:
-        met = f.read()
-        host_metrics = json.loads(met)
-        for i in host_metrics:
-            new_host_metrics.append(json.loads(i))
+    f = open("{0}host_metrics.json".format(RESULTS_DIR), mode="r")
+    met = f.read()
+    f.close()
+    host_metrics = json.loads(met)
+    for i in host_metrics:
+        new_host_metrics.append(json.loads(i))
     return new_host_metrics
 
 
@@ -331,7 +352,7 @@ def main():
             print("\n\n\t")
             sys.exit(101)
 
-    asyncio.run(async_main(delay_duration=2 * 60), debug=True)  # mins
+    asyncio.run(async_main(delay_duration=10), debug=True)  # mins
 
 
 if __name__ == "__main__":
