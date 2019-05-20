@@ -16,8 +16,6 @@ services:
   cadvisor:
     image: google/cadvisor:latest
     container_name: cadvisor
-    ports:
-      - 8080:8080
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -33,14 +31,10 @@ services:
   push_to_gateway:
     image: prom/pushgateway
     container_name: push_to_gateway
-    ports:
-      - "9091:9091"
 
   redis:
     image: 'redis:5.0-alpine'
     container_name: redis
-    ports:
-      - "6379:6379"
 
   slow_app:
     build:
@@ -53,8 +47,6 @@ services:
       - compose.env
     labels:
       - "app_name=slow_app"
-    ports:
-      - "9797:9797"
 
   task_producer:
     build:
