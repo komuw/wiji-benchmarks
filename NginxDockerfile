@@ -1,5 +1,7 @@
 FROM nginx
 
+# nginx auth docs: http://nginx.org/en/docs/http/ngx_http_auth_basic_module.html
+
 RUN rm -rf /etc/nginx/.htpasswd
 
 # dynamically create password
