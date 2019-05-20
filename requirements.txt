@@ -10,7 +10,7 @@ cryptography==2.6.1
 redis==3.2.0
 
 # required to collect metrics and graph them
-prometheus-client==0.6.0
+prometheus_client==0.6.0
 
 # test requirements
 black
