@@ -21,8 +21,8 @@ class BenchmarksHook(wiji.hook.BaseHook):
         )
 
         # go to prometheus dashboard(http://localhost:9090/) & you can run queries like:
-        # 1. `container_memory_rss{name="wiji_cli", container_label_com_docker_compose_service="wiji_cli"}`
-        # 2. `container_memory_rss{name=~"wiji_cli|task_producer|redis"}`
+        # 1. container_memory_rss{name="wiji_cli", container_label_com_docker_compose_service="wiji_cli"}
+        # 2. container_memory_rss{name=~"wiji_cli|task_producer|redis"}
         # 3. number_of_tasks_total{ state=~"EXECUTED| QUEUED"}
 
     async def notify(
