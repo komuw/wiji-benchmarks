@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"net/http"
 	"time"
@@ -41,9 +40,9 @@ func main() {
 	http.HandleFunc("/slow", slowHandler)
 
 
-	log.Println("listening on port 9797 ...")
+	fmt.Println("listening on port 9797 ...")
 	err := http.ListenAndServe(":9797", nil)
 	if err != nil {
-		log.Fatal("\n ListenAndServe failed", err)
+		panic(err)
 	}
 }
