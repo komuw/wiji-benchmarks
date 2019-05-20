@@ -1,0 +1,5 @@
+FROM nginx
+
+RUN date +%s | sha256sum | base64 | head -c 43 > /etc/nginx/.htpasswd
+
+COPY ./nginx.conf /etc/nginx/nginx.conf
