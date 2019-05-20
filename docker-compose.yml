@@ -1,8 +1,38 @@
 version: '3'
 services:
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - cadvisor
+  
+  cadvisor:
+    image: google/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - redis
+      - slow_app
+      # - task_producer
+      # - wiji_cli
+      # - metrics
+
   redis:
     image: 'redis:5.0-alpine'
+    container_name: redis
     ports:
       - "6379:6379"
 
@@ -10,43 +40,47 @@ services:
     build:
       context: .
       dockerfile: slow_app/Dockerfile
+    container_name: slow_app
     volumes:
       - ./:/usr/src/app
     env_file:
       - compose.env
     ports:
-      - "8080:8080"
+      - "9797:9797"
 
-  task_producer:
-    build:
-      context: .
-    volumes:
-      - ./:/usr/src/app
-    command: python /usr/src/app/benchmarks/task_producer.py
-    env_file:
-      - compose.env
-    depends_on:
-      - redis
+  # task_producer:
+  #   build:
+  #     context: .
+  #   container_name: task_producer
+  #   volumes:
+  #     - ./:/usr/src/app
+  #   command: python /usr/src/app/benchmarks/task_producer.py
+  #   env_file:
+  #     - compose.env
+  #   depends_on:
+  #     - redis
 
-  workers:
-    build:
-      context: .
-    volumes:
-      - ./:/usr/src/app
-    command: wiji-cli --app benchmarks.wiji_app.myApp
-    env_file:
-      - compose.env
-    depends_on:
-      - redis
-      - slow_app
+  # wiji_cli:
+  #   build:
+  #     context: .
+  #   container_name: wiji_cli
+  #   volumes:
+  #     - ./:/usr/src/app
+  #   command: wiji-cli --app benchmarks.wiji_app.myApp
+  #   env_file:
+  #     - compose.env
+  #   depends_on:
+  #     - redis
+  #     - slow_app
 
-  metrics:
-    build:
-      context: .
-    volumes:
-      - ./:/usr/src/app
-    command: python /usr/src/app/benchmarks/metrics.py
-    env_file:
-      - compose.env
-    depends_on:
-      - redis
+  # metrics:
+  #   build:
+  #     context: .
+  #   container_name: metrics
+  #   volumes:
+  #     - ./:/usr/src/app
+  #   command: python /usr/src/app/benchmarks/metrics.py
+  #   env_file:
+  #     - compose.env
+  #   depends_on:
+  #     - redis

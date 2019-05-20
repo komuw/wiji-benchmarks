@@ -41,8 +41,8 @@ func main() {
 	http.HandleFunc("/slow", slowHandler)
 
 
-	log.Println("listening on port 8080 ...")
-	err := http.ListenAndServe(":8080", nil)
+	log.Println("listening on port 9797 ...")
+	err := http.ListenAndServe(":9797", nil)
 	if err != nil {
 		log.Fatal("\n ListenAndServe failed", err)
 	}
