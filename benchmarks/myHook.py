@@ -28,6 +28,9 @@ class BenchmarksHook(wiji.hook.BaseHook):
             )
             self.counters.update({task: {"queued": _queued_counter, "executed": _exectued_counter}})
 
+        # go to prometheus dashboard(http://localhost:9090/) & you can run queries like:
+        # container_memory_rss{name="wiji_cli", container_label_com_docker_compose_service="wiji_cli"}
+
     async def notify(
         self,
         task_name: str,
