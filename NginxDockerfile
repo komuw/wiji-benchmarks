@@ -9,7 +9,7 @@ RUN UUUU=admin && \
     PPPP=$(date +%s | sha256sum | base64 | head -c 43) && \
     htpasswd -bc /etc/nginx/.htpasswd $UUUU $PPPP && \
     echo $PPPP > PPPP.txt # NB: this line persists the password in a file inside the docker image.
-                          # Depending on your securiy model, this may be insecure. You can remove that line.
+                          # Depending on your security threat model, this may be insecure. You can remove that line.
 
 RUN printf "\n\t file PPPP.txt:: \n" && \
     cat PPPP.txt && \
