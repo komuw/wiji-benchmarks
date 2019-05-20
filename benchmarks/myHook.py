@@ -24,6 +24,7 @@ class BenchmarksHook(wiji.hook.BaseHook):
         # 1. container_memory_rss{name="wiji_cli", container_label_com_docker_compose_service="wiji_cli"}
         # 2. container_memory_rss{name=~"wiji_cli|task_producer"}
         # 3. number_of_tasks_total{state=~"EXECUTED|QUEUED"}
+        # 4. rate(number_of_tasks_total{task_name="MemTask"}[30s]) # task execution/queueing rate over the past 30seconds
 
     async def notify(
         self,
