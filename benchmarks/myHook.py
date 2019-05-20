@@ -18,12 +18,12 @@ class BenchmarksHook(wiji.hook.BaseHook):
         for task in _tasks:
             _queued_counter = prometheus_client.Counter(
                 "{task}_queued".format(task=task),
-                "number of task:{task} queued.".format(task=task),
+                "number of task:{task} that have been queued by wiji.".format(task=task),
                 registry=self.registry,
             )
             _exectued_counter = prometheus_client.Counter(
                 "{task}_exectued".format(task=task),
-                "number of task:{task} queued.".format(task=task),
+                "number of task:{task} that have been exectued by wiji.".format(task=task),
                 registry=self.registry,
             )
             self.counters.update({task: {"queued": _queued_counter, "executed": _exectued_counter}})
