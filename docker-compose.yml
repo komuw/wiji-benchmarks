@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: NginxDockerfile
+    container_name: nginx
     depends_on:
       - prometheus
     ports:
