@@ -6,6 +6,8 @@ services:
       dockerfile: NginxDockerfile
     # volumes:
     #   - ./.htpasswd:/etc/nginx/.htpasswd
+    depends_on:
+      - prometheus
     ports:
       - 9000:80
 
