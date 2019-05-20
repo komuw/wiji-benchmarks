@@ -1,44 +1,29 @@
 import sys
 import typing
-import random
 import logging
 
 import wiji
-import psutil
 
-from benchmarks import metrics
-
-
-myMet = metrics.Metrics()
-
-
-CURRENT_PROCESS = psutil.Process()
+import prometheus_client
 
 
 class BenchmarksHook(wiji.hook.BaseHook):
-    def __init__(self,) -> None:
+    def __init__(self) -> None:
         self.logger = wiji.logger.SimpleLogger("wiji.benchmarks.BenchmarksHook")
 
-    async def set_host_metrics(self):
-        """
-        calculates & set's various host metrics
-        """
-        if random.randint(0, 10) < 2:
-            # record host metrics only once in a while
-            mem = psutil.virtual_memory()
-            total_ram = mem.total / 1_000_000
-            cpu_percent = CURRENT_PROCESS.cpu_percent() / psutil.cpu_count()
-            process_id = CURRENT_PROCESS.pid
+        self.registry = prometheus_client.CollectorRegistry()
+        _labels = ["task_name", "state"]
+        self.counter = prometheus_client.Counter(
+            name="number_of_tasks",
+            documentation="number of tasks processed by wiji.",
+            labelnames=_labels,
+            registry=self.registry,
+        )
 
-            val = {
-                "total_ram": total_ram,
-                "rss_mem": CURRENT_PROCESS.memory_info().rss / 1_000_000,
-                "cpu_percent": cpu_percent,
-                "process_id": process_id,
-            }
-            await myMet.lpush("host_metrics", val)
-        else:
-            return
+        # go to prometheus dashboard(http://localhost:9090/) & you can run queries like:
+        # 1. container_memory_rss{name="wiji_cli", container_label_com_docker_compose_service="wiji_cli"}
+        # 2. container_memory_rss{name=~"wiji_cli|task_producer"}
+        # 3. number_of_tasks_total{state=~"EXECUTED|QUEUED"}
 
     async def notify(
         self,
@@ -53,9 +38,6 @@ class BenchmarksHook(wiji.hook.BaseHook):
         execution_exception: typing.Union[None, Exception] = None,
         return_value: typing.Union[None, typing.Any] = None,
     ) -> None:
-
-        await self.set_host_metrics()
-
         try:
             if not isinstance(queuing_exception, type(None)):
                 raise ValueError(
@@ -102,16 +84,9 @@ class BenchmarksHook(wiji.hook.BaseHook):
 
         try:
             if state == wiji.task.TaskState.QUEUED:
-                queuing_duration = float("{0:.4f}".format(queuing_duration["monotonic"]))
-                tasks_queued = await myMet.incr(
-                    counter_name="tasks_queued_counter_{0}".format(task_name)
-                )
-                val = {
-                    "task_name": task_name,
-                    "tasks_queued": tasks_queued,
-                    "queuing_duration": queuing_duration,
-                }
-                await myMet.set(task_name + "_queuing_duration", val)
+                self.counter.labels(
+                    task_name=queue_name, state=wiji.task.TaskState.QUEUED.name
+                ).inc()  # Increment by 1
                 self.logger.log(
                     logging.DEBUG,
                     {
@@ -123,17 +98,9 @@ class BenchmarksHook(wiji.hook.BaseHook):
                 )
 
             elif state == wiji.task.TaskState.EXECUTED:
-                execution_duration = float("{0:.4f}".format(execution_duration["monotonic"]))
-                tasks_dequeued = await myMet.incr(
-                    counter_name="tasks_dequeued_counter_{0}".format(task_name)
-                )
-                val = {
-                    "task_name": task_name,
-                    "tasks_dequeued": tasks_dequeued,
-                    "execution_duration": execution_duration,
-                }
-                await myMet.set(task_name + "_execution_duration", val)
-
+                self.counter.labels(
+                    task_name=queue_name, state=wiji.task.TaskState.EXECUTED.name
+                ).inc()  # Increment by 1
                 self.logger.log(
                     logging.DEBUG,
                     {
@@ -161,3 +128,7 @@ class BenchmarksHook(wiji.hook.BaseHook):
                 },
             )
             sys.exit(99)
+        finally:
+            prometheus_client.push_to_gateway(
+                "push_to_gateway:9091", job="BenchmarksHook", registry=self.registry
+            )

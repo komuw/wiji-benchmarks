@@ -53,7 +53,6 @@ class DiskIOTask(BaseTask):
     """
 
     queue_name = "DiskIOTask"
-    task_name = "task_name-{0}".format(queue_name)
 
     async def run(self, filename):
         content = "".join(random.choices(string.ascii_uppercase + string.digits, k=16384))  # 16KB
@@ -70,10 +69,9 @@ class NetworkIOTask(BaseTask):
     """
 
     queue_name = "NetworkIOTask"
-    task_name = "task_name-{0}".format(queue_name)
 
     async def run(self, *args, **kwargs):
-        url = "http://slow_app:8080/slow"
+        url = "http://slow_app:9797/slow"
 
         try:
             async with aiohttp.ClientSession() as session:
@@ -97,7 +95,6 @@ class CPUTask(BaseTask):
     """
 
     queue_name = "CPUTask"
-    task_name = "task_name-{0}".format(queue_name)
 
     async def run(self, *args, **kwargs):
         content = "".join(random.choices(string.ascii_uppercase + string.digits, k=16384))  # 16KB
@@ -121,7 +118,6 @@ class MemTask(BaseTask):
     """
 
     queue_name = "MemTask"
-    task_name = "task_name-{0}".format(queue_name)
 
     @staticmethod
     def calculate_ram():
@@ -156,7 +152,6 @@ class DividerTask(BaseTask):
     """
 
     queue_name = "DividerTask"
-    task_name = "task_name-{0}".format(queue_name)
 
     async def run(self, dividend):
         answer = dividend / 3
@@ -170,7 +165,6 @@ class AdderTask(BaseTask):
     """
 
     queue_name = "AdderTask"
-    task_name = "task_name-{0}".format(queue_name)
     chain = DividerTask
 
     async def run(self, a, b):

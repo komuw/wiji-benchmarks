@@ -11,7 +11,7 @@ redis==3.2.0
 
 # required to collect metrics and graph them
 psutil==5.6.2
-matplotlib==3.0.3
+prometheus_client
 
 # test requirements
 black
