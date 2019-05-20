@@ -1,6 +1,5 @@
 import sys
 import typing
-import random
 import logging
 
 import wiji
@@ -13,23 +12,18 @@ class BenchmarksHook(wiji.hook.BaseHook):
         self.logger = wiji.logger.SimpleLogger("wiji.benchmarks.BenchmarksHook")
 
         self.registry = prometheus_client.CollectorRegistry()
-        self.counters = {}
-        _tasks = ["DiskIOTask", "NetworkIOTask", "CPUTask", "MemTask", "DividerTask", "AdderTask"]
-        for task in _tasks:
-            _queued_counter = prometheus_client.Counter(
-                "{task}_queued".format(task=task),
-                "number of task:{task} that have been queued by wiji.".format(task=task),
-                registry=self.registry,
-            )
-            _exectued_counter = prometheus_client.Counter(
-                "{task}_exectued".format(task=task),
-                "number of task:{task} that have been exectued by wiji.".format(task=task),
-                registry=self.registry,
-            )
-            self.counters.update({task: {"queued": _queued_counter, "executed": _exectued_counter}})
+        _labels = ["task_name", "state"]
+        self.counter = prometheus_client.Counter(
+            name="number_of_tasks",
+            documentation="number of tasks processed by wiji.",
+            labelnames=_labels,
+            registry=self.registry,
+        )
 
         # go to prometheus dashboard(http://localhost:9090/) & you can run queries like:
-        # container_memory_rss{name="wiji_cli", container_label_com_docker_compose_service="wiji_cli"}
+        # 1. `container_memory_rss{name="wiji_cli", container_label_com_docker_compose_service="wiji_cli"}`
+        # 2. `container_memory_rss{name=~"wiji_cli|task_producer|redis"}`
+        # 3. number_of_tasks_total{ state=~"EXECUTED| QUEUED"}
 
     async def notify(
         self,
@@ -90,7 +84,9 @@ class BenchmarksHook(wiji.hook.BaseHook):
 
         try:
             if state == wiji.task.TaskState.QUEUED:
-                self.counters[queue_name]["queued"].inc()  # Increment by 1
+                self.counter.labels(
+                    task_name=queue_name, state=wiji.task.TaskState.QUEUED.name
+                ).inc()  # Increment by 1
                 self.logger.log(
                     logging.DEBUG,
                     {
@@ -102,7 +98,9 @@ class BenchmarksHook(wiji.hook.BaseHook):
                 )
 
             elif state == wiji.task.TaskState.EXECUTED:
-                self.counters[queue_name]["executed"].inc()  # Increment by 1
+                self.counter.labels(
+                    task_name=queue_name, state=wiji.task.TaskState.EXECUTED.name
+                ).inc()  # Increment by 1
                 self.logger.log(
                     logging.DEBUG,
                     {
