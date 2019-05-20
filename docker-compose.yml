@@ -28,7 +28,13 @@ services:
       - slow_app
       - task_producer
       - wiji_cli
-      - metrics
+      - push_to_gateway
+
+  push_to_gateway:
+    image: prom/pushgateway
+    container_name: push_to_gateway
+    ports:
+      - "9091:9091"
 
   redis:
     image: 'redis:5.0-alpine'
@@ -73,14 +79,3 @@ services:
       - redis
       - slow_app
 
-  metrics:
-    build:
-      context: .
-    container_name: metrics
-    volumes:
-      - ./:/usr/src/app
-    command: python /usr/src/app/benchmarks/metrics.py
-    env_file:
-      - compose.env
-    depends_on:
-      - redis
