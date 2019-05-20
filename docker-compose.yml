@@ -26,9 +26,9 @@ services:
     depends_on:
       - redis
       - slow_app
-      # - task_producer
-      # - wiji_cli
-      # - metrics
+      - task_producer
+      - wiji_cli
+      - metrics
 
   redis:
     image: 'redis:5.0-alpine'
@@ -48,39 +48,39 @@ services:
     ports:
       - "9797:9797"
 
-  # task_producer:
-  #   build:
-  #     context: .
-  #   container_name: task_producer
-  #   volumes:
-  #     - ./:/usr/src/app
-  #   command: python /usr/src/app/benchmarks/task_producer.py
-  #   env_file:
-  #     - compose.env
-  #   depends_on:
-  #     - redis
+  task_producer:
+    build:
+      context: .
+    container_name: task_producer
+    volumes:
+      - ./:/usr/src/app
+    command: python /usr/src/app/benchmarks/task_producer.py
+    env_file:
+      - compose.env
+    depends_on:
+      - redis
 
-  # wiji_cli:
-  #   build:
-  #     context: .
-  #   container_name: wiji_cli
-  #   volumes:
-  #     - ./:/usr/src/app
-  #   command: wiji-cli --app benchmarks.wiji_app.myApp
-  #   env_file:
-  #     - compose.env
-  #   depends_on:
-  #     - redis
-  #     - slow_app
+  wiji_cli:
+    build:
+      context: .
+    container_name: wiji_cli
+    volumes:
+      - ./:/usr/src/app
+    command: wiji-cli --app benchmarks.wiji_app.myApp
+    env_file:
+      - compose.env
+    depends_on:
+      - redis
+      - slow_app
 
-  # metrics:
-  #   build:
-  #     context: .
-  #   container_name: metrics
-  #   volumes:
-  #     - ./:/usr/src/app
-  #   command: python /usr/src/app/benchmarks/metrics.py
-  #   env_file:
-  #     - compose.env
-  #   depends_on:
-  #     - redis
+  metrics:
+    build:
+      context: .
+    container_name: metrics
+    volumes:
+      - ./:/usr/src/app
+    command: python /usr/src/app/benchmarks/metrics.py
+    env_file:
+      - compose.env
+    depends_on:
+      - redis
