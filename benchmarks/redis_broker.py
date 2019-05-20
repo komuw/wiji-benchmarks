@@ -58,7 +58,7 @@ class ExampleRedisBroker(wiji.broker.BaseBroker):
         return self._LOOP
 
     async def check(self, queue_name: str) -> None:
-        await asyncio.sleep(1 / 117)
+        await asyncio.sleep(0.00000000001)
 
     async def enqueue(self, item: str, queue_name: str) -> None:
         with concurrent.futures.ThreadPoolExecutor(
@@ -83,10 +83,10 @@ class ExampleRedisBroker(wiji.broker.BaseBroker):
                 if item:
                     return item
                 else:
-                    await asyncio.sleep(1 / 117)
+                    await asyncio.sleep(0.00000000001)
 
     def _blocking_dequeue(self, queue_name: str):
-        dequed_item = self.redis_instance.brpop(queue_name, timeout=3)
+        dequed_item = self.redis_instance.brpop(queue_name, timeout=1)
         if not dequed_item:
             return None
         dequed_item = dequed_item[1]
@@ -94,7 +94,7 @@ class ExampleRedisBroker(wiji.broker.BaseBroker):
 
     async def done(self, item: str, queue_name: str, state: wiji.task.TaskState) -> None:
         # dequeue already removed the item
-        return await asyncio.sleep(delay=0.02, result=None)
+        return None
 
     async def shutdown(self, queue_name: str, duration: float) -> None:
         return await asyncio.sleep(delay=-1, result=None)
