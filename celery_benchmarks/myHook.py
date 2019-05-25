@@ -20,7 +20,7 @@ class BenchmarksHook:
         # 3. number_of_tasks_total{state="EXECUTED"}
         # 4. rate(number_of_tasks_total{task_name="MemTask"}[30s]) # task execution/queueing rate over the past 30seconds
 
-    async def notify(self, task_name) -> None:
+    def notify(self, task_name) -> None:
         try:
             self.counter.labels(task_name=task_name, state="EXECUTED").inc()  # Increment by 1
         finally:
