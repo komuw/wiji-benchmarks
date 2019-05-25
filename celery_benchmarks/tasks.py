@@ -9,6 +9,7 @@ import celery
 import requests
 from cryptography.fernet import Fernet
 
+import myHook
 
 """
 run as:
@@ -30,6 +31,8 @@ CELERY_BROKER_URL = "redis://{host}:{port}/{db_number}".format(
     password=password, host=host, port=port, db_number=0
 )
 app = celery.Celery("tasks", broker=CELERY_BROKER_URL)
+
+the_hook = myHook.BenchmarksHook()
 
 
 def get_memory():
@@ -79,6 +82,7 @@ class DiskIOTask(app.Task):
         f.write(content)
         f.close()
         os.remove(filename)
+        the_hook.notify(task_name=self.name)
 
 
 class NetworkIOTask(app.Task):
@@ -93,6 +97,7 @@ class NetworkIOTask(app.Task):
         url = "http://slow_app:9797/slow"
         res = requests.get(url)
         print("response", res.content[:50])
+        the_hook.notify(task_name=self.name)
 
 
 class CPUTask(app.Task):
@@ -118,6 +123,7 @@ class CPUTask(app.Task):
         f = Fernet(fernet_key)
         token = f.encrypt(content.encode())
         f.decrypt(token)
+        the_hook.notify(task_name=self.name)
 
 
 class MemTask(app.Task):
@@ -137,14 +143,7 @@ class MemTask(app.Task):
         stored_string = "a"
         stored_string = stored_string * target_size
         stored_string_size = sys.getsizeof(stored_string)
-        self.logger.log(
-            logging.INFO,
-            {
-                "event": "MemTask_run",
-                "stored_string_size_bytes": stored_string_size,
-                "stored_string_size_MB": stored_string_size / 1_000_000,
-            },
-        )
+        the_hook.notify(task_name=self.name)
 
 
 class DividerTask(app.Task):
@@ -158,6 +157,7 @@ class DividerTask(app.Task):
     def run(self, dividend):
         answer = dividend / 3
         return answer
+        the_hook.notify(task_name=self.name)
 
 
 class AdderTask(app.Task):
@@ -171,6 +171,7 @@ class AdderTask(app.Task):
     def run(self, a, b):
         result = a + b
         return result
+        the_hook.notify(task_name=self.name)
 
 
 app.tasks.register(DiskIOTask())
