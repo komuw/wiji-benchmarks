@@ -26,7 +26,10 @@ pip install -U docker-compose
 wget https://github.com/komuw/wiji-benchmarks/archive/master.zip && \
 unzip master.zip && \
 mv wiji-benchmarks-master/ wiji-benchmarks && \
-cd wiji-benchmarks/
+cd wiji-benchmarks/wiji_benchmarks
+
+# alternatively:
+# cd wiji-benchmarks/celery_benchmarks
 
 # edit `compose.env` to add neccesary credentials
 
