@@ -1,0 +1,12 @@
+# core requirements
+celery==4.1.1
+
+# secondary requirements
+aiohttp==3.5.4
+aiodns==2.0.0
+cchardet==2.1.4
+cryptography==2.6.1
+redis==3.2.0
+
+# required to collect metrics and graph them
+prometheus_client==0.6.0
