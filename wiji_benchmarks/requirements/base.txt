@@ -1,5 +1,7 @@
 # core requirements
-wiji==0.3.0
+# wiji==0.3.0
+git+https://github.com/komuw/wiji.git@d677a2bed6e9a50e6fff229d2da21cb7ffbf0588
+
 wijisqs==0.4.3
 
 # secondary requirements
