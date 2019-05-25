@@ -1,4 +1,3 @@
-import asyncio
 import random
 import string
 import threading
@@ -70,14 +69,6 @@ def main() -> None:
     """
     main function to produce tasks.
     """
-    gather_tasks = asyncio.gather(
-        produce_disk_io_task(),
-        produce_network_io_task(),
-        produce_cpu_bound_task(),
-        produce_ram_bound_task(),
-        produce_adder_task(),
-    )
-
     t = threading.Thread(
         target=produce_disk_io_task,
         name="Thread-<task_producer-{0}>".format(produce_disk_io_task.__name__),
