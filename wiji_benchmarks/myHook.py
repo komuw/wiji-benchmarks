@@ -12,7 +12,7 @@ class BenchmarksHook(wiji.hook.BaseHook):
         self.logger = wiji.logger.SimpleLogger("wiji.benchmarks.BenchmarksHook")
 
         self.registry = prometheus_client.CollectorRegistry()
-        _labels = ["task_name", "state"]
+        _labels = ["library", "task_name", "state"]
         self.counter = prometheus_client.Counter(
             name="number_of_tasks",
             documentation="number of tasks processed by wiji.",
@@ -86,7 +86,7 @@ class BenchmarksHook(wiji.hook.BaseHook):
         try:
             if state == wiji.task.TaskState.QUEUED:
                 self.counter.labels(
-                    task_name=queue_name, state=wiji.task.TaskState.QUEUED.name
+                    library="wiji", task_name=queue_name, state=wiji.task.TaskState.QUEUED.name
                 ).inc()  # Increment by 1
                 self.logger.log(
                     logging.DEBUG,
@@ -100,7 +100,7 @@ class BenchmarksHook(wiji.hook.BaseHook):
 
             elif state == wiji.task.TaskState.EXECUTED:
                 self.counter.labels(
-                    task_name=queue_name, state=wiji.task.TaskState.EXECUTED.name
+                    library="wiji", task_name=queue_name, state=wiji.task.TaskState.EXECUTED.name
                 ).inc()  # Increment by 1
                 self.logger.log(
                     logging.DEBUG,

@@ -6,7 +6,7 @@ import prometheus_client
 class BenchmarksHook:
     def __init__(self) -> None:
         self.registry = prometheus_client.CollectorRegistry()
-        _labels = ["task_name", "state"]
+        _labels = ["library", "task_name", "state"]
         self.counter = prometheus_client.Counter(
             name="number_of_tasks",
             documentation="number of tasks processed by celery.",
@@ -22,7 +22,9 @@ class BenchmarksHook:
 
     def notify(self, task_name) -> None:
         try:
-            self.counter.labels(task_name=task_name, state="EXECUTED").inc()  # Increment by 1
+            self.counter.labels(
+                library="celery", task_name=task_name, state="EXECUTED"
+            ).inc()  # Increment by 1
         finally:
             prometheus_client.push_to_gateway(
                 "push_to_gateway:9091", job="BenchmarksHook", registry=self.registry
