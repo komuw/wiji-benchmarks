@@ -1,5 +1,5 @@
 # core requirements
-wiji==0.2.0
+wiji==0.3.0
 wijisqs==0.4.3
 
 # secondary requirements
