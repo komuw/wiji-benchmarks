@@ -1,9 +1,9 @@
 import wiji
 
-from benchmarks import tasks
+import tasks
 
 # Usage:
-#   wiji-cli --app benchmarks.wiji_app.myApp
+#   wiji-cli --app wiji_app.myApp
 
 myApp = wiji.app.App(
     task_classes=[

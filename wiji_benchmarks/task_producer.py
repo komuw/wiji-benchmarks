@@ -2,11 +2,11 @@ import asyncio
 import random
 import string
 
-from benchmarks import tasks
+import tasks
 
 
 # Usage:
-#  python benchmarks/task_producer.py
+#  python wiji_benchmarks/task_producer.py
 
 
 max_tasks_to_queue: int = 100_004

@@ -11,8 +11,8 @@ from cryptography.fernet import Fernet
 import wiji
 import wijisqs
 
-from benchmarks import myHook
-from benchmarks import redis_broker
+import myHook
+import redis_broker
 
 
 def get_memory():

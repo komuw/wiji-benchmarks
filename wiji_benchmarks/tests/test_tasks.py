@@ -3,7 +3,7 @@ from unittest import TestCase, mock
 
 import wiji
 
-from benchmarks.tasks import CPUTask
+from wiji_benchmarks.tasks import CPUTask
 
 
 class TestTasks(TestCase):
