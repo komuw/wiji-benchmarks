@@ -17,12 +17,12 @@ class BenchmarksHook:
         # go to prometheus dashboard(http://localhost:9000/) & you can run queries like:
         # 1. container_memory_rss{name="celery_cli", container_label_com_docker_compose_service="celery_cli"}
         # 2. container_memory_rss{name=~"celery_cli|task_producer"}
-        # 3. number_of_tasks_total{state=~"EXECUTED|QUEUED"}
+        # 3. number_of_tasks_total{state="EXECUTED"}
         # 4. rate(number_of_tasks_total{task_name="MemTask"}[30s]) # task execution/queueing rate over the past 30seconds
 
     async def notify(self, task_name) -> None:
         try:
-            self.counter.labels(task_name=task_name, state="QUEUED").inc()  # Increment by 1
+            self.counter.labels(task_name=task_name, state="EXECUTED").inc()  # Increment by 1
         finally:
             prometheus_client.push_to_gateway(
                 "push_to_gateway:9091", job="BenchmarksHook", registry=self.registry
