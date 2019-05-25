@@ -11,7 +11,7 @@ shopt -s nullglob globstar
 export DEBIAN_FRONTEND=noninteractive && \
 apt -y update && \
 apt -y install python && \
-apt -y install python-pip nano wget unzip curl
+apt -y install python-pip nano wget unzip curl screen
 
 # NB: do not install docker from snap; it is broken
 apt -y remove docker docker-engine docker.io containerd runc && \
@@ -29,5 +29,5 @@ mv wiji-benchmarks-master/ wiji-benchmarks && \
 cd wiji-benchmarks/
 
 # edit `compose.env` to add neccesary credentials
-screen -S wiji
-docker-compose up
+
+screen -dm docker-compose up
