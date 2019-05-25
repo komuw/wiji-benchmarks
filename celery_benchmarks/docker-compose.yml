@@ -46,10 +46,10 @@ services:
   slow_app:
     build:
       context: .
-      dockerfile: slow_app/Dockerfile
+      dockerfile: ../slow_app/Dockerfile
     container_name: slow_app
     volumes:
-      - ./:/usr/src/app
+      - ../:/usr/src/app
     env_file:
       - compose.env
     labels:
