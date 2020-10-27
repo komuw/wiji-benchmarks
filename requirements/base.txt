@@ -6,7 +6,7 @@ wijisqs==0.4.3
 aiohttp==3.5.4
 aiodns==2.0.0
 cchardet==2.1.4
-cryptography==2.6.1
+cryptography==3.2
 redis==3.2.0
 
 # required to collect metrics and graph them
